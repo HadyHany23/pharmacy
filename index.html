@@ -1,15 +1,13 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" ng-app="myApp">
   <head>
     <meta charset="UTF-8" />
-    <title>Empty Template</title>
+    <title>Pharmacy Management System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- AngularJS -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-route/1.8.3/angular-route.min.js"></script>
 
-    <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -18,45 +16,65 @@
     <script src="app.js"></script>
     <script src="services/supabaseService.js"></script>
     <script src="services/supabaseConfig.js"></script>
+
+    <script src="services/authService.js"></script>
     <script src="services/medicineService.js"></script>
     <script src="services/categoriesService.js"></script>
+
+    <script src="controller/MainController.js"></script>
+    <script src="controller/AuthController.js"></script>
     <script src="controller/MedicinesController.js"></script>
   </head>
 
-  <body ng-app="myApp">
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <body ng-controller="MainController">
+    <nav
+      class="navbar navbar-expand-lg bg-dark navbar-dark"
+      ng-if="isLoggedIn()"
+    >
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">nav</a>
+        <a class="navbar-brand" href="#">💊 PharmacyPOS</a>
         <button
           class="navbar-toggler"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
         >
           <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav me-auto">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Home</a>
+              <a class="nav-link" href="#!/medicines">Inventory</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#!/medicines">MedicinesList</a>
+
+            <li class="nav-item" ng-if="getUserRole() === 'Admin'">
+              <a class="nav-link text-warning" href="#!/users"
+                >Staff Management</a
+              >
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#!/about">About</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+
+            <li class="nav-item" ng-if="getUserRole() === 'Pharmacist'">
+              <a class="nav-link text-info" href="#!/prescriptions"
+                >Prescriptions</a
+              >
             </li>
           </ul>
+
+          <div class="d-flex align-items-center text-light">
+            <span class="me-3">Role: <strong>{{getUserRole()}}</strong></span>
+            <button class="btn btn-outline-danger btn-sm" ng-click="logout()">
+              Logout
+            </button>
+          </div>
         </div>
       </div>
     </nav>
 
-    <div ng-view></div>
+    <div class="container mt-4">
+      <div ng-view></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
