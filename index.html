@@ -1,62 +1,40 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Empty Template</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- AngularJS -->
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-route/1.8.3/angular-route.min.js"></script>
+<head>
+  <meta charset="UTF-8">
+  <title>PharmaCare | Management System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-route/1.8.3/angular-route.min.js"></script>
 
-    <script src="app.js"></script>
-    <script src="services/supabaseService.js"></script>
-    <script src="services/supabaseConfig.js"></script>
-    <script src="services/medicineService.js"></script>
-    <script src="services/categoriesService.js"></script>
-    <script src="controller/MedicinesController.js"></script>
-  </head>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="/style/style.css">
 
-  <body ng-app="myApp">
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">nav</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#!/medicines">MedicinesList</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#!/about">About</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+  <script src="app.js"></script>
+  <script src="services/supabaseConfig.js"></script>
+  <script src="services/supabaseService.js"></script>
+  <script src="services/medicineService.js"></script>
+  <script src="services/categoriesService.js"></script>
+  <script src="services/userService.js"></script>
+  <script src="controller/MedicinesController.js"></script>
+  <script src="controller/MedicineDetailController.js"></script>
+  <script src="controller/UsersController.js"></script>
+  <script src="controller/UserDetailController.js"></script>
+</head>
 
+<body ng-app="myApp" class="d-flex flex-column min-vh-100">
+  <div ng-include="'views/header.html'"></div>
+
+  <main class="container py-5">
     <div ng-view></div>
-  </body>
+  </main>
+
+  <div ng-include="'views/footer.html'"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
 </html>

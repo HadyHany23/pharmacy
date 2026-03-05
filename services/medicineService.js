@@ -19,6 +19,10 @@ app.service("MedicineService", function ($http, SB_CONFIG) {
     return $http.delete(TABLE_URL + "?id=eq." + id, getConfig);
   };
 
+  this.getMedicineById = function (id) {
+    return $http.get(TABLE_URL + "?id=eq." + id + "&select=*", getConfig);
+  };
+
   this.searchMedicines = function (query) {
     return $http.get(TABLE_URL + "?name=ilike.*" + query + "*", getConfig);
   };
