@@ -59,24 +59,14 @@
               <span class="badge bg-light text-dark border">{{ med.category }}</span>
             </td>
             <td>
-              <span class="badge bg-light text-dark border"
-                >{{ med.category }}</span
-              >
-            </td>
-            <td>
-              <span
-                ng-class="{'text-danger fw-bold': isExpired(med.expiry_date)}"
-              >
-                <i class="bi bi-calendar3 me-1"></i> {{ med.expiry_date |
-                date:'mediumDate' }}
+              <span ng-class="{'text-danger fw-bold': isExpired(med.expiry_date)}">
+                <i class="bi bi-calendar3 me-1"></i> {{ med.expiry_date | date:'mediumDate' }}
               </span>
             </td>
             <td class="fw-semibold text-primary">{{ med.price | currency }}</td>
             <td>
-              <span
-                class="badge px-3 py-2"
-                ng-class="{'bg-danger': med.stock < 10, 'bg-warning text-dark': med.stock < 20, 'bg-success': med.stock >= 20}"
-              >
+              <span class="badge px-3 py-2"
+                ng-class="{'bg-danger': med.stock < 10, 'bg-warning text-dark': med.stock < 20, 'bg-success': med.stock >= 20}">
                 {{ med.stock }}
               </span>
             </td>
@@ -121,11 +111,7 @@
           </h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form
-          name="medForm"
-          ng-submit="medForm.$valid && saveMedicine()"
-          novalidate
-        >
+        <form name="medForm" ng-submit="medForm.$valid && saveMedicine()" novalidate>
           <div class="modal-body">
             <div class="row g-3">
               <div class="col-md-6">
@@ -135,11 +121,7 @@
               <div class="col-md-6">
                 <label class="form-label fw-bold">Category</label>
                 <div class="input-group">
-                  <select
-                    class="form-select"
-                    ng-model="currentMed.category"
-                    required
-                  >
+                  <select class="form-select" ng-model="currentMed.category" required>
                     <option value="">Select Category</option>
                     <option ng-repeat="cat in categories" value="{{cat.name}}">
                       {{cat.name}}
