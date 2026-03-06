@@ -72,5 +72,6 @@ body {
 }
 
 main {
-  min-height: 70vh;
+  flex: 1;
+  min-height: calc(100vh - 200px);
 }
