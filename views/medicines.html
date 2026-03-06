@@ -1,231 +1,126 @@
-<div class="container">
-  <h2 class="text-center">Pharmacy Inventory Management</h2>
-
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <strong>{{ isEdit ? 'Edit Medicine' : 'Add New Medicine' }}</strong>
-    </div>
-
-    <div class="panel-body" ng-if="getUserRole() === 'admin'">
-      <form
-        name="medForm"
-        ng-submit="medForm.$valid && saveMedicine()"
-        novalidate
-      >
-        <div class="row">
-          <div
-            class="col-md-3 form-group"
-            ng-class="{'has-error': medForm.name.$touched && medForm.name.$invalid}"
-          >
-            <label>Medicine Name</label>
-            <input
-              type="text"
-              name="name"
-              class="form-control"
-              ng-model="currentMed.name"
-              required
-            />
-            <small
-              class="help-block"
-              ng-if="medForm.name.$touched && medForm.name.$error.required"
-              >Required</small
-            >
-          </div>
-
-          <div class="col-md-3 form-group">
-            <label>Category</label>
-            <div class="input-group">
-              <select
-                class="form-control"
-                ng-model="currentMed.category"
-                required
-              >
-                <option value="">Select Category</option>
-                <option ng-repeat="cat in categories" value="{{cat.name}}">
-                  {{cat.name}}
-                </option>
-              </select>
-              <span class="input-group-btn">
-                <button
-                  class="btn btn-primary"
-                  type="button"
-                  title="Add New Category"
-                  ng-click="addNewCategory()"
-                >
-                  <i class="glyphicon glyphicon-plus">add</i>
-                </button>
-              </span>
-            </div>
-          </div>
-
-          <div class="col-md-2 form-group">
-            <label>Expiry Date</label>
-            <input
-              type="date"
-              class="form-control"
-              ng-model="currentMed.expiry_date"
-              required
-            />
-          </div>
-
-          <div class="col-md-2 form-group">
-            <label>Price ($)</label>
-            <input
-              type="number"
-              step="0.01"
-              class="form-control"
-              ng-model="currentMed.price"
-              required
-            />
-          </div>
-
-          <div class="col-md-2 form-group">
-            <label>Stock Qty</label>
-            <input
-              type="number"
-              class="form-control"
-              ng-model="currentMed.stock"
-              required
-            />
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-12 text-right">
-            <button
-              type="button"
-              class="btn btn-default"
-              ng-if="isEdit"
-              ng-click="cancelEdit()"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="btn btn-success"
-              ng-disabled="medForm.$invalid"
-            >
-              <i
-                class="glyphicon"
-                ng-class="isEdit ? 'glyphicon-save' : 'glyphicon-plus'"
-              ></i>
-              {{ isEdit ? 'Update Medicine' : 'Add to Inventory' }}
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
+<div class="container fade-in">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark"><i class="bi bi-box-seam me-2"></i>Inventory Management</h2>
+    <button class="btn btn-primary shadow-sm" ng-click="resetForm()" data-bs-toggle="modal"
+      data-bs-target="#medicineModal">
+      <i class="bi bi-plus-lg me-1"></i> Add Medicine
+    </button>
   </div>
 
-  <div class="row" style="margin-bottom: 15px">
-    <div class="col-md-8">
-      <div class="input-group">
-        <span class="input-group-addon"
-          ><i class="glyphicon glyphicon-search"></i
-        ></span>
-        <input
-          type="text"
-          class="form-control"
-          placeholder="Search by medicine name..."
-          ng-model="searchQuery"
-        />
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body bg-white rounded">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control border-start-0" placeholder="Search medicines..."
+              ng-model="searchQuery">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <select class="form-select" ng-model="selectedCategory">
+            <option value="">All Categories</option>
+            <option ng-repeat="cat in categories" value="{{cat.name}}">{{cat.name}}</option>
+          </select>
+        </div>
       </div>
     </div>
-    <div class="col-md-4">
-      <select class="form-control" ng-model="selectedCategory">
-        <option value="">All Categories</option>
-        <option ng-repeat="cat in categories" value="{{cat.name}}">
-          {{cat.name}}
-        </option>
-      </select>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th class="ps-4">Medicine Name</th>
+            <th>Category</th>
+            <th>Expiry Date</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th class="text-center pe-4">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white">
+          <tr ng-repeat="med in medicines | filter: {name: searchQuery, category: selectedCategory}">
+            <td class="ps-4 fw-bold text-secondary">{{ med.name }}</td>
+            <td><span class="badge bg-light text-dark border">{{ med.category }}</span></td>
+            <td>
+              <span ng-class="{'text-danger fw-bold': isExpired(med.expiry_date)}">
+                <i class="bi bi-calendar3 me-1"></i> {{ med.expiry_date | date:'mediumDate' }}
+              </span>
+            </td>
+            <td class="fw-semibold text-primary">{{ med.price | currency }}</td>
+            <td>
+              <span class="badge px-3 py-2"
+                ng-class="{'bg-danger': med.stock < 10, 'bg-warning text-dark': med.stock < 20, 'bg-success': med.stock >= 20}">
+                {{ med.stock }}
+              </span>
+            </td>
+            <td class="text-center pe-4">
+              <div class="btn-group gap-2">
+                <a href="#!/medicine-detail/{{med.id}}" class="btn btn-outline-info btn-sm">
+                  <i class="bi bi-eye"></i>
+                </a>
+                <button class="btn btn-outline-warning btn-sm" ng-click="editMedicine(med)" data-bs-toggle="modal"
+                  data-bs-target="#medicineModal">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm" ng-click="deleteMedicine(med.id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <div ng-if="loading" class="text-center">
-    <span class="glyphicon glyphicon-refresh glyphicon-spin"></span>
-    Loading Inventory...
-  </div>
-
-  <div class="panel panel-info" ng-if="!loading">
-    <div class="panel-heading">
-      <strong>Medicine Stock List</strong>
+  <div class="modal fade" id="medicineModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title">{{ isEdit ? 'Edit Medicine' : 'Add New Medicine' }}</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form name="medForm" ng-submit="medForm.$valid && saveMedicine()" novalidate>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Medicine Name</label>
+                <input type="text" class="form-control" ng-model="currentMed.name" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Category</label>
+                <div class="input-group">
+                  <select class="form-select" ng-model="currentMed.category" required>
+                    <option value="">Select Category</option>
+                    <option ng-repeat="cat in categories" value="{{cat.name}}">{{cat.name}}</option>
+                  </select>
+                  <button class="btn btn-outline-secondary" type="button" ng-click="addNewCategory()">+</button>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold">Price</label>
+                <input type="number" step="0.01" class="form-control" ng-model="currentMed.price" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold">Stock</label>
+                <input type="number" class="form-control" ng-model="currentMed.stock" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold">Expiry Date</label>
+                <input type="date" class="form-control" ng-model="currentMed.expiry_date" required>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary px-4">{{ isEdit ? 'Update Changes' : 'Save Medicine'
+              }}</button>
+          </div>
+        </form>
+      </div>
     </div>
-
-    <table class="table table-hover table-striped">
-      <thead>
-        <tr class="info">
-          <th>Name</th>
-          <th>Category</th>
-          <th>Expiry Date</th>
-          <th>Price</th>
-          <th>Stock</th>
-          <th width="150" class="text-right" ng-if="getUserRole() === 'admin'">
-            Actions
-          </th>
-          <th
-            width="150"
-            class="text-right"
-            ng-if="getUserRole() === 'cashier'"
-          >
-            Order
-          </th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr
-          ng-repeat="med in medicines | filter: {name: searchQuery, category: selectedCategory}"
-        >
-          <td><strong>{{ med.name }}</strong></td>
-          <td><span class="label label-info">{{ med.category }}</span></td>
-
-          <td>
-            <span
-              ng-class="{'text-danger font-bold': isExpired(med.expiry_date)}"
-            >
-              <i class="glyphicon glyphicon-calendar"></i> {{ med.expiry_date |
-              date:'mediumDate' }}
-            </span>
-          </td>
-
-          <td>{{ med.price | currency }}</td>
-
-          <td>
-            <span
-              class="badge"
-              ng-class="{'progress-bar-danger': med.stock < 10, 'text-danger': med.stock < 20, 'text-primary': med.stock >= 20}"
-            >
-              {{ med.stock }}
-            </span>
-          </td>
-
-          <td class="text-right" ng-if="getUserRole() === 'cashier'">
-            <button class="btn btn-warning btn-xs" ng-click="addToCart(med)">
-              Add to Cart
-            </button>
-          </td>
-
-          <td class="text-right" ng-if="getUserRole() === 'admin'">
-            <button class="btn btn-warning btn-xs" ng-click="editMedicine(med)">
-              Edit
-            </button>
-            <button
-              class="btn btn-danger btn-xs"
-              ng-click="deleteMedicine(med.id)"
-            >
-              delete
-            </button>
-          </td>
-        </tr>
-
-        <tr
-          ng-if="(medicines | filter: {name: searchQuery, category: selectedCategory}).length === 0"
-        >
-          <td colspan="6" class="text-center text-muted">
-            No medicines matching your search
-          </td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 </div>
