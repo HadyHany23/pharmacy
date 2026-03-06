@@ -21,6 +21,20 @@ app.config(function ($routeProvider) {
       requireLogin: true,
       role: "admin", // Only for the boss
     })
+    .when("/cart", {
+      templateUrl: "views/cart.html",
+      controller: "CartController",
+    })
+    .when("/checkout", {
+      templateUrl: "views/checkout.html",
+      controller: "CheckoutController",
+      requireLogin: true,
+    })
+    .when("/history", {
+      templateUrl: "views/history.html",
+      controller: "HistoryController",
+      requireLogin: true,
+    })
     .when("/about", {
       templateUrl: "views/about.html",
     })

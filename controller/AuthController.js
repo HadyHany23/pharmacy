@@ -15,7 +15,7 @@ app.controller("AuthController", function ($scope, $location, AuthService) {
     ).then(function (res) {
       if (res.data.length > 0) {
         const user = res.data[0];
-        // SAVE the role and session to the browser memory
+        localStorage.setItem("userId", user.id);
         localStorage.setItem("sessionToken", "active");
         localStorage.setItem("userRole", user.roles.name);
         localStorage.setItem("userName", user.full_name);

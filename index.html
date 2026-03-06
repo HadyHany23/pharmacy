@@ -22,11 +22,15 @@
     <script src="services/categoriesService.js"></script>
     <script src="services/profilesService.js"></script>
     <script src="services/roles.js"></script>
+    <script src="services/cartService.js"></script>
 
     <script src="controller/MainController.js"></script>
     <script src="controller/AuthController.js"></script>
     <script src="controller/MedicinesController.js"></script>
     <script src="controller/ProfilesController.js"></script>
+    <script src="controller/CartController.js"></script>
+    <script src="controller/CheckoutController.js"></script>
+    <script src="controller/HistoryController.js"></script>
   </head>
 
   <body ng-controller="MainController">
@@ -56,10 +60,20 @@
                 >Staff Profiles</a
               >
             </li>
+
+            <li class="nav-item">
+              <a class="nav-link text-white" href="#!/history">Sales History</a>
+            </li>
           </ul>
 
           <div class="d-flex align-items-center text-light">
             <span class="me-3">Role: <strong>{{getUserRole()}}</strong></span>
+            <button
+              class="btn btn-outline-success btn-sm"
+              ng-if="getUserRole() === 'cashier'"
+            >
+              <a class="nav-link text-info" href="#!/cart">Cart</a>
+            </button>
             <button class="btn btn-outline-danger btn-sm" ng-click="logout()">
               Logout
             </button>

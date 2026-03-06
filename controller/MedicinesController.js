@@ -1,6 +1,6 @@
 app.controller(
   "MedicinesController",
-  function ($scope, MedicineService, CategoryService) {
+  function ($scope, MedicineService, CategoryService, CartService) {
     // 1. Initialize Variables
     $scope.medicines = [];
     $scope.categories = [];
@@ -11,6 +11,21 @@ app.controller(
     // Search & Filter state
     $scope.searchQuery = "";
     $scope.selectedCategory = "";
+
+    // ================= CASHIER / CART LOGIC =================
+
+    $scope.addToCart = function (medicine) {
+      // Find if the item is already in the cart to check combined quantity
+      var cartItem = CartService.getCart().find((i) => i.id === medicine.id);
+      var currentInCart = cartItem ? cartItem.quantity : 0;
+
+      if (currentInCart + 1 > medicine.stock) {
+        alert("Not enough stock available! Remaining: " + medicine.stock);
+        return;
+      }
+
+      CartService.addToCart(medicine);
+    };
 
     // ================= CATEGORY LOGIC =================
 
@@ -27,7 +42,6 @@ app.controller(
     $scope.addNewCategory = function () {
       var newCat = prompt("Enter new category name:");
       if (newCat) {
-        // Check for duplicates locally first
         var exists = $scope.categories.some(
           (c) => c.name.toLowerCase() === newCat.toLowerCase(),
         );
@@ -36,8 +50,8 @@ app.controller(
           alert("Category already exists!");
         } else {
           CategoryService.addCategory(newCat).then(function () {
-            $scope.loadCategories(); // Refresh the list
-            $scope.currentMed.category = newCat; // Auto-select it
+            $scope.loadCategories();
+            $scope.currentMed.category = newCat;
           });
         }
       }
@@ -60,7 +74,6 @@ app.controller(
     };
 
     $scope.saveMedicine = function () {
-      // Duplicate Name Check (Only for NEW medicines)
       if (!$scope.isEdit) {
         const exists = $scope.medicines.some(
           (m) => m.name.toLowerCase() === $scope.currentMed.name.toLowerCase(),
@@ -85,14 +98,16 @@ app.controller(
     $scope.editMedicine = function (medicine) {
       $scope.isEdit = true;
       $scope.currentMed = angular.copy(medicine);
-      // Ensure the date is a real Date object so the HTML5 input can read it
       if ($scope.currentMed.expiry_date) {
         $scope.currentMed.expiry_date = new Date($scope.currentMed.expiry_date);
       }
     };
 
     $scope.updateMedicine = function () {
-      MedicineService.updateMedicine($scope.currentMed.id, $scope.currentMed)
+      // We use a copy to ensure we don't send extra UI-only properties to Supabase
+      var dataToSave = angular.copy($scope.currentMed);
+
+      MedicineService.updateMedicine(dataToSave.id, dataToSave)
         .then(function () {
           $scope.loadMedicines();
           $scope.resetForm();

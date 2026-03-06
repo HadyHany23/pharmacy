@@ -1,5 +1,5 @@
 app.service("MedicineService", function ($http, SB_CONFIG) {
-  // Use SB_CONFIG.URL which should already have /rest/v1/
+  // Services only need $http and your config
   const TABLE_URL = SB_CONFIG.URL + "medicines";
   const getConfig = { headers: SB_CONFIG.HEADERS() };
 

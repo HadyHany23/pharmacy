@@ -1,0 +1,116 @@
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <div class="card shadow-sm p-4 bg-light">
+        <h3 class="mb-4">
+          <i class="glyphicon glyphicon-stats"></i> Sales Analytics & History
+        </h3>
+
+        <div class="row">
+          <div class="col-md-3">
+            <label>Search Customer</label>
+            <input
+              type="text"
+              class="form-control"
+              ng-model="searchCustomer"
+              placeholder="Name or Phone..."
+            />
+          </div>
+          <div class="col-md-2">
+            <label>From Date</label>
+            <input type="date" class="form-control" ng-model="startDate" />
+          </div>
+          <div class="col-md-2">
+            <label>To Date</label>
+            <input type="date" class="form-control" ng-model="endDate" />
+          </div>
+          <div class="col-md-5 text-right" style="margin-top: 25px">
+            <button class="btn btn-warning" ng-click="resetFilters()">
+              Clear Filters
+            </button>
+            <button class="btn btn-primary" ng-click="loadHistory()">
+              <i class="glyphicon glyphicon-refresh"></i> Refresh Data
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default border-0 shadow">
+    <table class="table table-hover align-middle">
+      <thead class="bg-primary text-white">
+        <tr>
+          <th ng-click="sortReverse = !sortReverse" style="cursor: pointer">
+            Date
+            <i
+              class="glyphicon"
+              ng-class="sortReverse ? 'glyphicon-sort-by-attributes-alt' : 'glyphicon-sort-by-attributes'"
+            ></i>
+          </th>
+          <th>Order ID</th>
+          <th>Customer Name</th>
+          <th>Phone</th>
+          <th class="text-right">Total Amount</th>
+          <th class="text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody
+        ng-repeat="order in orders | filter:{customers: {name: searchCustomer}} | filter:dateFilter | orderBy:'created_at':sortReverse"
+      >
+        <tr>
+          <td>{{order.created_at | date:'MMM d, y h:mm a'}}</td>
+          <td><code>#{{order.id.split('-')[0]}}</code></td>
+          <td><strong>{{order.customers.name}}</strong></td>
+          <td>{{order.customers.phone}}</td>
+          <td class="text-right text-success">
+            <strong>{{order.total_price | currency}}</strong>
+          </td>
+          <td class="text-center">
+            <button
+              class="btn btn-info btn-xs"
+              ng-click="order.expanded = !order.expanded"
+            >
+              {{order.expanded ? 'Hide Details' : 'View Items'}}
+            </button>
+          </td>
+        </tr>
+
+        <tr ng-if="order.expanded" class="bg-light">
+          <td colspan="6">
+            <div class="p-3 border rounded bg-white mx-5 shadow-sm">
+              <h5>Items in this Order:</h5>
+              <table class="table table-sm table-bordered mb-0">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Medicine</th>
+                    <th>Qty</th>
+                    <th>Unit Price</th>
+                    <th class="text-right">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="item in order.order_items">
+                    <td>{{item.medicines.name}}</td>
+                    <td>{{item.quantity}}</td>
+                    <td>{{item.unit_price | currency}}</td>
+                    <td class="text-right">
+                      {{ (item.quantity * item.unit_price) | currency }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div
+      ng-if="(orders | filter:{customers: {name: searchCustomer}} | filter:dateFilter).length === 0"
+      class="text-center p-5"
+    >
+      <h4 class="text-muted">No records found matching your filters.</h4>
+    </div>
+  </div>
+</div>
