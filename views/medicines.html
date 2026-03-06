@@ -159,7 +159,9 @@
           <th>Expiry Date</th>
           <th>Price</th>
           <th>Stock</th>
-          <th width="150" class="text-right">Actions</th>
+          <th width="150" class="text-right" ng-if="getUserRole() === 'admin'">
+            Actions
+          </th>
         </tr>
       </thead>
 
@@ -190,7 +192,7 @@
             </span>
           </td>
 
-          <td class="text-right">
+          <td class="text-right" ng-if="getUserRole() === 'admin'">
             <button class="btn btn-warning btn-xs" ng-click="editMedicine(med)">
               Edit
             </button>

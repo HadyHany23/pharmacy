@@ -15,11 +15,11 @@ app.config(function ($routeProvider) {
       controller: "MedicinesController",
       requireLogin: true, // Door is locked
     })
-    .when("/users", {
-      templateUrl: "views/users.html",
-      controller: "UsersController",
+    .when("/profiles", {
+      templateUrl: "views/profiles.html",
+      controller: "ProfilesController",
       requireLogin: true,
-      role: "Admin", // Only for the boss
+      role: "admin", // Only for the boss
     })
     .when("/about", {
       templateUrl: "views/about.html",
