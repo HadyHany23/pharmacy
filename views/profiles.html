@@ -150,6 +150,7 @@
           <th>Full Name</th>
           <th>Username</th>
           <th>Role ID</th>
+          <th>Password</th>
           <th width="150" class="text-right">Actions</th>
         </tr>
       </thead>
@@ -158,8 +159,12 @@
         <tr ng-repeat="p in profiles | filter: searchQuery">
           <td><strong>{{ p.full_name }}</strong></td>
           <td><code>{{ p.username }}</code></td>
-          <td><span class="label label-primary">{{ p.role_id }}</span></td>
-
+          <td>
+            <span class="label label-primary"
+              >{{ p.roles.name || 'No Role' }}</span
+            >
+          </td>
+          <td>{{p.password}}</td>
           <td class="text-right">
             <button class="btn btn-warning btn-xs" ng-click="editProfile(p)">
               Edit

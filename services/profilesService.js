@@ -1,18 +1,19 @@
 app.service("ProfilesService", function ($http, SB_CONFIG) {
-  // Use SB_CONFIG.URL which should already have /rest/v1/
   const TABLE_URL = SB_CONFIG.URL + "profiles";
   const getConfig = { headers: SB_CONFIG.HEADERS() };
 
   this.getProfile = function () {
-    return $http.get(TABLE_URL + "?select=*", getConfig);
+    return $http.get(TABLE_URL + "?select=*,roles(name)", getConfig);
   };
 
-  this.createProfile = function (medicine) {
-    return $http.post(TABLE_URL, medicine, getConfig);
+  // Renamed parameter to 'profileData' to match the context
+  this.createProfile = function (profileData) {
+    return $http.post(TABLE_URL, profileData, getConfig);
   };
 
-  this.updateProfile = function (id, medicine) {
-    return $http.patch(TABLE_URL + "?id=eq." + id, medicine, getConfig);
+  // Renamed parameter to 'profileData'
+  this.updateProfile = function (id, profileData) {
+    return $http.patch(TABLE_URL + "?id=eq." + id, profileData, getConfig);
   };
 
   this.deleteProfile = function (id) {
@@ -20,6 +21,7 @@ app.service("ProfilesService", function ($http, SB_CONFIG) {
   };
 
   this.searchProfile = function (query) {
-    return $http.get(TABLE_URL + "?name=ilike.*" + query + "*", getConfig);
+    // Also corrected the search field: profiles usually search by 'full_name' or 'username'
+    return $http.get(TABLE_URL + "?full_name=ilike.*" + query + "*", getConfig);
   };
 });

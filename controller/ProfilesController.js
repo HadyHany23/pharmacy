@@ -90,17 +90,23 @@ app.controller(
     };
 
     $scope.updateProfile = function () {
-      ProfilesService.updateProfile(
-        $scope.currentProfile.id,
-        $scope.currentProfile,
-      )
+      // 1. Create a clean copy so we don't mess up the UI
+      var dataToSave = angular.copy($scope.currentProfile);
+
+      // 2. Remove the 'roles' object because Supabase can't save nested objects
+      // back into the profiles table. It only wants the role_id!
+      delete dataToSave.roles;
+
+      // 3. Send the CLEAN data to the service
+      ProfilesService.updateProfile(dataToSave.id, dataToSave)
         .then(function () {
           $scope.loadProfiles();
           $scope.resetForm();
-          alert("Profile updated!");
+          alert("Profile updated successfully!");
         })
         .catch(function (error) {
           console.error("Error updating profile", error);
+          alert("Update failed. Check the console.");
         });
     };
 
