@@ -38,18 +38,39 @@ app.controller(
 
       $scope.processing = true;
 
-      // Step A: Save or Resolve Customer
-      let customerPromise = $scope.customerFound
-        ? Promise.resolve({ data: [$scope.customer] })
-        : $http.post(SB_CONFIG.URL + "customers", $scope.customer, {
+      // --- STEP A: RESOLVE CUSTOMER (The 409 Fix) ---
+      let customerPromise;
+
+      if ($scope.customerFound) {
+        // We already have them from the findCustomer search
+        customerPromise = Promise.resolve({ data: [$scope.customer] });
+      } else {
+        // Attempt to create a new customer
+        customerPromise = $http
+          .post(SB_CONFIG.URL + "customers", $scope.customer, {
             headers: {
               ...SB_CONFIG.HEADERS(),
               Prefer: "return=representation",
             },
+          })
+          .catch(function (err) {
+            // If 409 happens, it means the phone number exists. Just fetch that user.
+            if (err.status === 409) {
+              return $http.get(
+                SB_CONFIG.URL + "customers?phone=eq." + $scope.customer.phone,
+                HEADERS,
+              );
+            }
+            throw err; // Re-throw if it's a different error
           });
+      }
 
       customerPromise
         .then(function (custRes) {
+          if (!custRes.data || custRes.data.length === 0) {
+            throw { data: { message: "Could not find or create customer." } };
+          }
+
           const customerId = custRes.data[0].id;
 
           // Step B: Create the Order
@@ -84,7 +105,6 @@ app.controller(
         })
         .then(function () {
           // Step D: UPDATE MEDICINE STOCK
-          // We create an array of "Update" promises for every item in the cart
           const stockUpdates = $scope.cart.map((item) => {
             const newStock = item.stock - item.quantity;
 
@@ -95,7 +115,6 @@ app.controller(
             );
           });
 
-          // Wait for ALL stock updates to finish before moving on
           return Promise.all(stockUpdates);
         })
         .then(function () {
@@ -105,10 +124,14 @@ app.controller(
         })
         .catch((err) => {
           console.error("Transaction Error:", err);
-          alert(
-            "Checkout Failed: " +
-              (err.data ? err.data.message : "Network Error"),
-          );
+          let msg = "Network Error";
+          if (err.data) {
+            msg =
+              err.data.message ||
+              err.data.error_description ||
+              JSON.stringify(err.data);
+          }
+          alert("Checkout Failed: " + msg);
         })
         .finally(() => {
           $scope.processing = false;
