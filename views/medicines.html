@@ -6,7 +6,7 @@
       <strong>{{ isEdit ? 'Edit Medicine' : 'Add New Medicine' }}</strong>
     </div>
 
-    <div class="panel-body">
+    <div class="panel-body" ng-if="getUserRole() === 'admin'">
       <form
         name="medForm"
         ng-submit="medForm.$valid && saveMedicine()"
