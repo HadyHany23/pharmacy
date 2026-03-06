@@ -7,7 +7,10 @@ app.service("RolesService", function ($http, SB_CONFIG) {
   };
 
   this.addRoles = function (roleName) {
-    // Supabase expects an object { name: "Value" }
     return $http.post(URL, { name: roleName }, config);
+  };
+
+  this.deleteRole = function (roleId) {
+    return $http.delete(URL + "?id=eq." + roleId, config);
   };
 });

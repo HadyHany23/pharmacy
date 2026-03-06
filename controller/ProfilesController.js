@@ -42,6 +42,39 @@ app.controller(
       }
     };
 
+    $scope.removeRole = function () {
+      // 1. Check if a role is actually selected in the dropdown
+      if (!$scope.currentProfile.role_id) {
+        alert("Please select a role from the list first to delete it.");
+        return;
+      }
+
+      // 2. Confirm with the user
+      if (
+        confirm(
+          "Are you sure you want to delete this role? This cannot be undone.",
+        )
+      ) {
+        RolesService.deleteRole($scope.currentProfile.role_id)
+          .then(function () {
+            alert("Role deleted successfully!");
+            $scope.currentProfile.role_id = ""; // Clear selection
+            $scope.loadRoles(); // Refresh the list
+          })
+          .catch(function (err) {
+            console.error(err);
+            // Error 23503 is usually a "Foreign Key Violation" (Staff still using this role)
+            if (err.status === 409 || err.data.code === "23503") {
+              alert(
+                "Cannot delete: There are staff members currently assigned to this role.",
+              );
+            } else {
+              alert("Error deleting role: " + err.data.message);
+            }
+          });
+      }
+    };
+
     // ================= PROFILE LOGIC =================
 
     $scope.loadProfiles = function () {
