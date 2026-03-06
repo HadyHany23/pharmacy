@@ -34,8 +34,7 @@ app.controller(
             $scope.customer = res.data[0];
             $scope.customerFound = true;
 
-            // NEW: Track which fields were originally empty
-            // If a field is empty, we allow editing. If it has data, we lock it.
+            // Flags for locking fields that already have data
             $scope.canEditName = !$scope.customer.name;
             $scope.canEditEmail = !$scope.customer.email;
             $scope.canEditAddress = !$scope.customer.address;
@@ -43,7 +42,6 @@ app.controller(
             toast("Customer Found: " + $scope.customer.name);
           } else {
             $scope.customerFound = false;
-            // New customer: everything is editable
             const phone = $scope.customer.phone;
             $scope.customer = {
               name: "",
@@ -65,10 +63,6 @@ app.controller(
       if ($scope.cart.length === 0) return;
       $scope.processing = true;
 
-      let customerPromise;
-
-      // Create a clean object for Customer Save/Update
-      // This ensures we only send fields that exist in your 'customers' table
       const customerData = {
         name: $scope.customer.name,
         phone: $scope.customer.phone,
@@ -76,9 +70,12 @@ app.controller(
         address: $scope.customer.address || null,
       };
 
+      // --- CRITICAL FIX: The Step A Logic ---
+      let resolveCustomer;
+
       if ($scope.customerFound && $scope.customer.id) {
-        // UPDATE existing customer
-        customerPromise = $http.patch(
+        // If we found them, always PATCH to save any new info (like address)
+        resolveCustomer = $http.patch(
           SB_CONFIG.URL + "customers?id=eq." + $scope.customer.id,
           customerData,
           {
@@ -89,8 +86,8 @@ app.controller(
           },
         );
       } else {
-        // CREATE new customer
-        customerPromise = $http
+        // If not found via search, try to create
+        resolveCustomer = $http
           .post(SB_CONFIG.URL + "customers", customerData, {
             headers: {
               ...SB_CONFIG.HEADERS(),
@@ -98,27 +95,42 @@ app.controller(
             },
           })
           .catch((err) => {
+            // If 409 happens, it means they exist but we didn't have the ID.
+            // We fetch them, then PATCH the new data (address) onto them.
             if (err.status === 409) {
-              return $http.get(
-                SB_CONFIG.URL + "customers?phone=eq." + $scope.customer.phone,
-                HEADERS,
-              );
+              return $http
+                .get(
+                  SB_CONFIG.URL + "customers?phone=eq." + $scope.customer.phone,
+                  HEADERS,
+                )
+                .then((res) => {
+                  const existingId = res.data[0].id;
+                  return $http.patch(
+                    SB_CONFIG.URL + "customers?id=eq." + existingId,
+                    customerData,
+                    {
+                      headers: {
+                        ...SB_CONFIG.HEADERS(),
+                        Prefer: "return=representation",
+                      },
+                    },
+                  );
+                });
             }
             throw err;
           });
       }
 
-      customerPromise
+      resolveCustomer
         .then(function (custRes) {
-          // Ensure we got a valid ID back
-          const customerId = custRes.data[0].id;
+          // custRes.data could be an array (from Prefer: representation)
+          const customer = custRes.data[0] || custRes.data;
+          const customerId = customer.id;
 
-          // STEP B: Create Order - ONLY send what the table needs
+          // STEP B: Create Order
           const orderData = {
             customer_id: customerId,
             total_price: parseFloat($scope.totalAmount),
-            // Only include 'notes' if you actually have that column in Supabase!
-            // notes: $scope.orderNotes || ""
           };
 
           return $http.post(SB_CONFIG.URL + "orders", orderData, {
@@ -150,9 +162,7 @@ app.controller(
           const stockUpdates = $scope.cart.map((item) => {
             return $http.patch(
               SB_CONFIG.URL + "medicines?id=eq." + item.id,
-              {
-                stock: item.stock - item.quantity,
-              },
+              { stock: item.stock - item.quantity },
               HEADERS,
             );
           });
@@ -164,15 +174,11 @@ app.controller(
           $location.path("/medicines");
         })
         .catch((err) => {
-          console.error("FULL ERROR DETAIL:", err);
-          let errorDetail = err.data
+          console.error("FULL ERROR:", err);
+          let detail = err.data
             ? err.data.message || err.data.details
-            : "Check console";
-          Swal.fire(
-            "Error 400",
-            "Database rejected the data: " + errorDetail,
-            "error",
-          );
+            : "Connection error";
+          Swal.fire("Error", "Transaction failed: " + detail, "error");
         })
         .finally(() => ($scope.processing = false));
     };
