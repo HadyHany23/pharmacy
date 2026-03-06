@@ -72,6 +72,19 @@ body {
 }
 
 main {
-  flex: 1;
-  min-height: calc(100vh - 200px);
+  min-height: 70vh;
+}
+
+/* Sortable Headers */
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.sortable-header i {
+  font-size: 0.75em;
+  opacity: 0.8;
+  color: #fff;
+  margin-left: 4px;
 }

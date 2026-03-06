@@ -1,6 +1,6 @@
 app.controller(
   "MedicinesController",
-  function ($scope, MedicineService, CategoryService) {
+  function ($scope, MedicineService, CategoryService, CartService) {
     // 1. Initialize Variables
     $scope.medicines = [];
     $scope.categories = [];
@@ -11,6 +11,50 @@ app.controller(
     // Search & Filter state
     $scope.searchQuery = "";
     $scope.selectedCategory = "";
+
+    // Sorting state
+    $scope.sortColumn = "";
+    $scope.sortReverse = false;
+
+    // Delete confirmation state
+    $scope.deleteId = null;
+
+    // Category modal state
+    $scope.newCategoryName = "";
+    $scope.categoryError = "";
+
+    // ================= SORTING LOGIC =================
+
+    $scope.sortData = function (column) {
+      if ($scope.sortColumn === column) {
+        $scope.sortReverse = !$scope.sortReverse;
+      } else {
+        $scope.sortColumn = column;
+        $scope.sortReverse = false;
+      }
+    };
+
+    $scope.getSortClass = function (column) {
+      if ($scope.sortColumn === column) {
+        return $scope.sortReverse ? "bi-arrow-down" : "bi-arrow-up";
+      }
+      return "bi-arrow-down-up"; // Default two-way arrow icon
+    };
+
+    // ================= CASHIER / CART LOGIC =================
+
+    $scope.addToCart = function (medicine) {
+      // Find if the item is already in the cart to check combined quantity
+      var cartItem = CartService.getCart().find((i) => i.id === medicine.id);
+      var currentInCart = cartItem ? cartItem.quantity : 0;
+
+      if (currentInCart + 1 > medicine.stock) {
+        alert("Not enough stock available! Remaining: " + medicine.stock);
+        return;
+      }
+
+      CartService.addToCart(medicine);
+    };
 
     // ================= CATEGORY LOGIC =================
 
@@ -25,21 +69,42 @@ app.controller(
     };
 
     $scope.addNewCategory = function () {
-      var newCat = prompt("Enter new category name:");
-      if (newCat) {
-        // Check for duplicates locally first
-        var exists = $scope.categories.some(
-          (c) => c.name.toLowerCase() === newCat.toLowerCase(),
-        );
+      $scope.newCategoryName = "";
+      $scope.categoryError = "";
+      // Show the modal using Bootstrap's modal API
+      var categoryModal = new bootstrap.Modal(
+        document.getElementById("categoryModal"),
+      );
+      categoryModal.show();
+    };
 
-        if (exists) {
-          alert("Category already exists!");
-        } else {
-          CategoryService.addCategory(newCat).then(function () {
-            $scope.loadCategories(); // Refresh the list
-            $scope.currentMed.category = newCat; // Auto-select it
-          });
-        }
+    $scope.confirmAddCategory = function () {
+      if (!$scope.newCategoryName || $scope.newCategoryName.trim() === "") {
+        $scope.categoryError = "Please enter a category name";
+        return;
+      }
+
+      var newCat = $scope.newCategoryName.trim();
+      var exists = $scope.categories.some(
+        (c) => c.name.toLowerCase() === newCat.toLowerCase(),
+      );
+
+      if (exists) {
+        $scope.categoryError = "Category already exists!";
+      } else {
+        CategoryService.addCategory(newCat).then(function () {
+          $scope.loadCategories();
+          $scope.currentMed.category = newCat;
+          $scope.newCategoryName = "";
+          $scope.categoryError = "";
+          // Hide the modal
+          var categoryModal = bootstrap.Modal.getInstance(
+            document.getElementById("categoryModal"),
+          );
+          if (categoryModal) {
+            categoryModal.hide();
+          }
+        });
       }
     };
 
@@ -60,7 +125,6 @@ app.controller(
     };
 
     $scope.saveMedicine = function () {
-      // Duplicate Name Check (Only for NEW medicines)
       if (!$scope.isEdit) {
         const exists = $scope.medicines.some(
           (m) => m.name.toLowerCase() === $scope.currentMed.name.toLowerCase(),
@@ -85,14 +149,16 @@ app.controller(
     $scope.editMedicine = function (medicine) {
       $scope.isEdit = true;
       $scope.currentMed = angular.copy(medicine);
-      // Ensure the date is a real Date object so the HTML5 input can read it
       if ($scope.currentMed.expiry_date) {
         $scope.currentMed.expiry_date = new Date($scope.currentMed.expiry_date);
       }
     };
 
     $scope.updateMedicine = function () {
-      MedicineService.updateMedicine($scope.currentMed.id, $scope.currentMed)
+      // We use a copy to ensure we don't send extra UI-only properties to Supabase
+      var dataToSave = angular.copy($scope.currentMed);
+
+      MedicineService.updateMedicine(dataToSave.id, dataToSave)
         .then(function () {
           $scope.loadMedicines();
           $scope.resetForm();
@@ -103,10 +169,28 @@ app.controller(
     };
 
     $scope.deleteMedicine = function (id) {
-      if (!confirm("Are you sure?")) return;
-      MedicineService.deleteMedicine(id).then(function () {
-        $scope.loadMedicines();
-      });
+      $scope.deleteId = id;
+      // Show the modal using Bootstrap's modal API
+      var deleteModal = new bootstrap.Modal(
+        document.getElementById("deleteModal"),
+      );
+      deleteModal.show();
+    };
+
+    $scope.confirmDelete = function () {
+      if ($scope.deleteId) {
+        MedicineService.deleteMedicine($scope.deleteId).then(function () {
+          $scope.loadMedicines();
+          $scope.deleteId = null;
+          // Hide the modal
+          var deleteModal = bootstrap.Modal.getInstance(
+            document.getElementById("deleteModal"),
+          );
+          if (deleteModal) {
+            deleteModal.hide();
+          }
+        });
+      }
     };
 
     // ================= UTILS =================

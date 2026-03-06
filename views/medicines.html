@@ -1,8 +1,11 @@
 <div class="container fade-in">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-dark"><i class="bi bi-box-seam me-2"></i>Inventory Management</h2>
-    <button class="btn btn-primary shadow-sm" ng-click="resetForm()" data-bs-toggle="modal"
-      data-bs-target="#medicineModal">
+    <h2 class="fw-bold text-dark">
+      <i class="bi bi-box-seam me-2"></i>Inventory Management
+    </h2>
+
+    <button class="btn btn-primary shadow-sm" ng-if="getUserRole() === 'admin'" ng-click="resetForm()"
+      data-bs-toggle="modal" data-bs-target="#medicineModal">
       <i class="bi bi-plus-lg me-1"></i> Add Medicine
     </button>
   </div>
@@ -14,13 +17,15 @@
           <div class="input-group">
             <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
             <input type="text" class="form-control border-start-0" placeholder="Search medicines..."
-              ng-model="searchQuery">
+              ng-model="searchQuery" />
           </div>
         </div>
         <div class="col-md-6">
           <select class="form-select" ng-model="selectedCategory">
             <option value="">All Categories</option>
-            <option ng-repeat="cat in categories" value="{{cat.name}}">{{cat.name}}</option>
+            <option ng-repeat="cat in categories" value="{{cat.name}}">
+              {{cat.name}}
+            </option>
           </select>
         </div>
       </div>
@@ -34,16 +39,25 @@
           <tr>
             <th class="ps-4">Medicine Name</th>
             <th>Category</th>
-            <th>Expiry Date</th>
+            <th class="sortable-header" ng-click="sortData('expiry_date')">
+              Expiry Date
+              <i class="bi ms-1" ng-class="getSortClass('expiry_date')"></i>
+            </th>
             <th>Price</th>
-            <th>Stock</th>
+            <th class="sortable-header" ng-click="sortData('stock')">
+              Stock
+              <i class="bi ms-1" ng-class="getSortClass('stock')"></i>
+            </th>
             <th class="text-center pe-4">Actions</th>
           </tr>
         </thead>
         <tbody class="bg-white">
-          <tr ng-repeat="med in medicines | filter: {name: searchQuery, category: selectedCategory}">
+          <tr
+            ng-repeat="med in medicines | filter: {name: searchQuery, category: selectedCategory} | orderBy:sortColumn:sortReverse">
             <td class="ps-4 fw-bold text-secondary">{{ med.name }}</td>
-            <td><span class="badge bg-light text-dark border">{{ med.category }}</span></td>
+            <td>
+              <span class="badge bg-light text-dark border">{{ med.category }}</span>
+            </td>
             <td>
               <span ng-class="{'text-danger fw-bold': isExpired(med.expiry_date)}">
                 <i class="bi bi-calendar3 me-1"></i> {{ med.expiry_date | date:'mediumDate' }}
@@ -58,17 +72,29 @@
             </td>
             <td class="text-center pe-4">
               <div class="btn-group gap-2">
-                <a href="#!/medicine-detail/{{med.id}}" class="btn btn-outline-info btn-sm">
+                <a href="#!/medicine-detail/{{med.id}}" class="btn btn-outline-info btn-sm" title="View Details">
                   <i class="bi bi-eye"></i>
                 </a>
-                <button class="btn btn-outline-warning btn-sm" ng-click="editMedicine(med)" data-bs-toggle="modal"
-                  data-bs-target="#medicineModal">
+
+                <button class="btn btn-warning btn-sm" ng-if="getUserRole() === 'cashier'" ng-click="addToCart(med)">
+                  <i class="bi bi-cart-plus"></i> Add to Cart
+                </button>
+
+                <button class="btn btn-outline-warning btn-sm" ng-if="getUserRole() === 'admin'"
+                  ng-click="editMedicine(med)" data-bs-toggle="modal" data-bs-target="#medicineModal">
                   <i class="bi bi-pencil-square"></i>
                 </button>
-                <button class="btn btn-outline-danger btn-sm" ng-click="deleteMedicine(med.id)">
+                <button class="btn btn-outline-danger btn-sm" ng-if="getUserRole() === 'admin'"
+                  ng-click="deleteMedicine(med.id)">
                   <i class="bi bi-trash"></i>
                 </button>
               </div>
+            </td>
+          </tr>
+
+          <tr ng-if="(medicines | filter: {name: searchQuery, category: selectedCategory}).length === 0">
+            <td colspan="6" class="text-center py-4 text-muted">
+              No medicines found matching your search.
             </td>
           </tr>
         </tbody>
@@ -76,11 +102,13 @@
     </div>
   </div>
 
-  <div class="modal fade" id="medicineModal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade" id="medicineModal" tabindex="-1" aria-hidden="true" ng-if="getUserRole() === 'admin'">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header bg-dark text-white">
-          <h5 class="modal-title">{{ isEdit ? 'Edit Medicine' : 'Add New Medicine' }}</h5>
+          <h5 class="modal-title">
+            {{ isEdit ? 'Edit Medicine' : 'Add New Medicine' }}
+          </h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <form name="medForm" ng-submit="medForm.$valid && saveMedicine()" novalidate>
@@ -88,38 +116,111 @@
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label fw-bold">Medicine Name</label>
-                <input type="text" class="form-control" ng-model="currentMed.name" required>
+                <input type="text" class="form-control" ng-model="currentMed.name" required />
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-bold">Category</label>
                 <div class="input-group">
                   <select class="form-select" ng-model="currentMed.category" required>
                     <option value="">Select Category</option>
-                    <option ng-repeat="cat in categories" value="{{cat.name}}">{{cat.name}}</option>
+                    <option ng-repeat="cat in categories" value="{{cat.name}}">
+                      {{cat.name}}
+                    </option>
                   </select>
-                  <button class="btn btn-outline-secondary" type="button" ng-click="addNewCategory()">+</button>
+                  <button class="btn btn-outline-secondary" type="button" ng-click="addNewCategory()">
+                    +
+                  </button>
                 </div>
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-bold">Price</label>
-                <input type="number" step="0.01" class="form-control" ng-model="currentMed.price" required>
+                <input type="number" step="0.01" min="0.01" class="form-control" ng-model="currentMed.price" required />
+                <small ng-show="medForm.price.$error.min" class="text-danger">
+                  Price must be greater than 0
+                </small>
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-bold">Stock</label>
-                <input type="number" class="form-control" ng-model="currentMed.stock" required>
+                <input type="number" min="1" class="form-control" ng-model="currentMed.stock" required />
+                <small ng-show="medForm.stock.$error.min" class="text-danger">
+                  Stock must be at least 1
+                </small>
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-bold">Expiry Date</label>
-                <input type="date" class="form-control" ng-model="currentMed.expiry_date" required>
+                <input type="date" class="form-control" ng-model="currentMed.expiry_date" required />
               </div>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary px-4">{{ isEdit ? 'Update Changes' : 'Save Medicine'
-              }}</button>
+            <div class="w-100">
+              <div ng-if="medForm.$invalid" class="alert alert-warning py-2 mb-2">
+                <small class="mb-0">
+                  <i class="bi bi-exclamation-triangle me-1"></i>
+                  Please fill all required fields correctly to enable the Save button.
+                </small>
+              </div>
+              <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-primary px-4" data-bs-dismiss="modal"
+                  ng-disabled="medForm.$invalid">
+                  {{ isEdit ? 'Update Changes' : 'Save Medicine' }}
+                </button>
+              </div>
+            </div>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Input Modal -->
+  <div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">
+            <i class="bi bi-plus-circle me-2"></i>Add New Category
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="newCategoryName" class="form-label fw-bold">Enter new category name:</label>
+            <input type="text" class="form-control" id="newCategoryName" ng-model="newCategoryName"
+              placeholder="e.g., Antibiotics, Pain Killers">
+          </div>
+          <div ng-if="categoryError" class="alert alert-danger" role="alert">
+            {{ categoryError }}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" ng-click="confirmAddCategory()">Add Category</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">
+            <i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">Are you sure you want to delete this medicine?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" ng-click="confirmDelete()">OK</button>
+        </div>
       </div>
     </div>
   </div>

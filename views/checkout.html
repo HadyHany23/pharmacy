@@ -1,0 +1,72 @@
+<div class="container">
+  <h2 class="text-center">Final Checkout</h2>
+  <hr />
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel panel-primary">
+        <div class="panel-heading">Customer Details</div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>Phone Number (Search)</label>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                ng-model="customer.phone"
+                placeholder="Enter phone..."
+              />
+              <span class="input-group-btn">
+                <button class="btn btn-info" ng-click="findCustomer()">
+                  Search
+                </button>
+              </span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Customer Name</label>
+            <input
+              type="text"
+              class="form-control"
+              ng-model="customer.name"
+              ng-disabled="customerFound"
+            />
+          </div>
+          <div class="form-group">
+            <label>Notes</label>
+            <textarea class="form-control" ng-model="orderNotes"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">Order Summary</div>
+        <table class="table">
+          <tr ng-repeat="item in cart">
+            <td>{{item.name}} x {{item.quantity}}</td>
+            <td class="text-right">
+              {{ (item.price * item.quantity) | currency }}
+            </td>
+          </tr>
+          <tr class="active">
+            <td><strong>Total Amount</strong></td>
+            <td class="text-right">
+              <strong>{{ totalAmount | currency }}</strong>
+            </td>
+          </tr>
+        </table>
+        <div class="panel-body">
+          <button
+            class="btn btn-success btn-block btn-lg"
+            ng-click="processOrder()"
+            ng-disabled="!customer.name || cart.length === 0 || processing"
+          >
+            {{ processing ? 'Processing...' : 'Complete Sale' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

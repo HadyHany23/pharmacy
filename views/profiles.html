@@ -1,0 +1,189 @@
+<div class="container">
+  <h2 class="text-center">Staff Management</h2>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <strong
+        >{{ isEdit ? 'Edit Staff Profile' : 'Register New Staff' }}</strong
+      >
+    </div>
+
+    <div class="panel-body">
+      <form
+        name="profileForm"
+        ng-submit="profileForm.$valid && saveProfile()"
+        novalidate
+      >
+        <div class="row">
+          <div
+            class="col-md-3 form-group"
+            ng-class="{'has-error': profileForm.full_name.$touched && profileForm.full_name.$invalid}"
+          >
+            <label>Full Name</label>
+            <input
+              type="text"
+              name="full_name"
+              class="form-control"
+              ng-model="currentProfile.full_name"
+              required
+            />
+            <small
+              class="help-block"
+              ng-if="profileForm.full_name.$touched && profileForm.full_name.$error.required"
+              >Required</small
+            >
+          </div>
+
+          <div
+            class="col-md-3 form-group"
+            ng-class="{'has-error': profileForm.username.$touched && profileForm.username.$invalid}"
+          >
+            <label>Username</label>
+            <input
+              type="text"
+              name="username"
+              class="form-control"
+              ng-model="currentProfile.username"
+              required
+            />
+            <small
+              class="help-block"
+              ng-if="profileForm.username.$touched && profileForm.username.$error.required"
+              >Required</small
+            >
+          </div>
+
+          <div class="col-md-3 form-group">
+            <label>Assigned Role</label>
+            <div class="input-group">
+              <select
+                class="form-control"
+                ng-model="currentProfile.role_id"
+                required
+              >
+                <option value="">Select Role</option>
+                <option ng-repeat="role in roles" value="{{role.id}}">
+                  {{role.name}}
+                </option>
+              </select>
+              <span class="input-group-btn">
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  title="Add New Role"
+                  ng-click="addNewRole()"
+                >
+                  Add
+                </button>
+              </span>
+            </div>
+          </div>
+
+          <div class="col-md-3 form-group">
+            <label>Password</label>
+            <input
+              type="text"
+              class="form-control"
+              ng-model="currentProfile.password"
+              placeholder="{{ isEdit ? 'Update password' : 'Set password' }}"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12 text-right">
+            <button
+              type="button"
+              class="btn btn-default"
+              ng-if="isEdit"
+              ng-click="cancelEdit()"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn btn-success"
+              ng-disabled="profileForm.$invalid"
+            >
+              <i
+                class="glyphicon"
+                ng-class="isEdit ? 'glyphicon-save' : 'glyphicon-user'"
+              ></i>
+              {{ isEdit ? 'Update Profile' : 'Create Staff Account' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row" style="margin-bottom: 15px">
+    <div class="col-md-12">
+      <div class="input-group">
+        <span class="input-group-addon"
+          ><i class="glyphicon glyphicon-search"></i
+        ></span>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Search by name or username..."
+          ng-model="searchQuery"
+        />
+      </div>
+    </div>
+  </div>
+
+  <div ng-if="loading" class="text-center">
+    <span class="glyphicon glyphicon-refresh glyphicon-spin"></span>
+    Loading Staff List...
+  </div>
+
+  <div class="panel panel-info" ng-if="!loading">
+    <div class="panel-heading">
+      <strong>Active Staff Members</strong>
+    </div>
+
+    <table class="table table-hover table-striped">
+      <thead>
+        <tr class="info">
+          <th>Full Name</th>
+          <th>Username</th>
+          <th>Role ID</th>
+          <th>Password</th>
+          <th width="150" class="text-right">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr ng-repeat="p in profiles | filter: searchQuery">
+          <td><strong>{{ p.full_name }}</strong></td>
+          <td><code>{{ p.username }}</code></td>
+          <td>
+            <span class="label label-primary"
+              >{{ p.roles.name || 'No Role' }}</span
+            >
+          </td>
+          <td>{{p.password}}</td>
+          <td class="text-right">
+            <button class="btn btn-warning btn-xs" ng-click="editProfile(p)">
+              Edit
+            </button>
+            <button
+              class="btn btn-danger btn-xs"
+              ng-click="deleteProfile(p.id)"
+            >
+              Delete
+            </button>
+          </td>
+        </tr>
+
+        <tr ng-if="(profiles | filter: searchQuery).length === 0">
+          <td colspan="4" class="text-center text-muted">
+            No staff members found matching your search
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

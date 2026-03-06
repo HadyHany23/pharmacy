@@ -1,0 +1,71 @@
+<div class="row justify-content-center" style="margin-top: 50px">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow border-0">
+      <div class="card-body p-5">
+        <div class="text-center mb-4">
+          <h2 class="fw-bold text-success">Staff Registration</h2>
+          <p class="text-muted">Create a new account and assign a role</p>
+        </div>
+
+        <form ng-submit="handleRegister()">
+          <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input
+              type="text"
+              class="form-control"
+              ng-model="regUser.full_name"
+              required
+              placeholder="John Doe"
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input
+              type="text"
+              class="form-control"
+              ng-model="regUser.username"
+              required
+              placeholder="johndoe123"
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              ng-model="regUser.password"
+              required
+              placeholder="Set a password"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Assign Role</label>
+            <select class="form-select" ng-model="regUser.role_id" required>
+              <option value="">-- Choose Role --</option>
+              <option ng-repeat="r in roles" value="{{r.id}}">
+                {{r.name}}
+              </option>
+            </select>
+          </div>
+
+          <button
+            class="btn btn-success w-100 py-2 mb-3"
+            type="submit"
+            ng-disabled="loading"
+          >
+            {{ loading ? 'Saving...' : 'Create Staff Account' }}
+          </button>
+
+          <div class="text-center">
+            <a href="#!/login" class="text-decoration-none small"
+              >Already have an account? Login</a
+            >
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
