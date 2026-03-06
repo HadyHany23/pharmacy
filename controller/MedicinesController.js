@@ -12,6 +12,35 @@ app.controller(
     $scope.searchQuery = "";
     $scope.selectedCategory = "";
 
+    // Sorting state
+    $scope.sortColumn = "";
+    $scope.sortReverse = false;
+
+    // Delete confirmation state
+    $scope.deleteId = null;
+
+    // Category modal state
+    $scope.newCategoryName = "";
+    $scope.categoryError = "";
+
+    // ================= SORTING LOGIC =================
+
+    $scope.sortData = function (column) {
+      if ($scope.sortColumn === column) {
+        $scope.sortReverse = !$scope.sortReverse;
+      } else {
+        $scope.sortColumn = column;
+        $scope.sortReverse = false;
+      }
+    };
+
+    $scope.getSortClass = function (column) {
+      if ($scope.sortColumn === column) {
+        return $scope.sortReverse ? "bi-arrow-down" : "bi-arrow-up";
+      }
+      return "bi-arrow-down-up"; // Default two-way arrow icon
+    };
+
     // ================= CASHIER / CART LOGIC =================
 
     $scope.addToCart = function (medicine) {
@@ -40,20 +69,42 @@ app.controller(
     };
 
     $scope.addNewCategory = function () {
-      var newCat = prompt("Enter new category name:");
-      if (newCat) {
-        var exists = $scope.categories.some(
-          (c) => c.name.toLowerCase() === newCat.toLowerCase(),
-        );
+      $scope.newCategoryName = "";
+      $scope.categoryError = "";
+      // Show the modal using Bootstrap's modal API
+      var categoryModal = new bootstrap.Modal(
+        document.getElementById("categoryModal"),
+      );
+      categoryModal.show();
+    };
 
-        if (exists) {
-          alert("Category already exists!");
-        } else {
-          CategoryService.addCategory(newCat).then(function () {
-            $scope.loadCategories();
-            $scope.currentMed.category = newCat;
-          });
-        }
+    $scope.confirmAddCategory = function () {
+      if (!$scope.newCategoryName || $scope.newCategoryName.trim() === "") {
+        $scope.categoryError = "Please enter a category name";
+        return;
+      }
+
+      var newCat = $scope.newCategoryName.trim();
+      var exists = $scope.categories.some(
+        (c) => c.name.toLowerCase() === newCat.toLowerCase(),
+      );
+
+      if (exists) {
+        $scope.categoryError = "Category already exists!";
+      } else {
+        CategoryService.addCategory(newCat).then(function () {
+          $scope.loadCategories();
+          $scope.currentMed.category = newCat;
+          $scope.newCategoryName = "";
+          $scope.categoryError = "";
+          // Hide the modal
+          var categoryModal = bootstrap.Modal.getInstance(
+            document.getElementById("categoryModal"),
+          );
+          if (categoryModal) {
+            categoryModal.hide();
+          }
+        });
       }
     };
 
@@ -118,10 +169,28 @@ app.controller(
     };
 
     $scope.deleteMedicine = function (id) {
-      if (!confirm("Are you sure?")) return;
-      MedicineService.deleteMedicine(id).then(function () {
-        $scope.loadMedicines();
-      });
+      $scope.deleteId = id;
+      // Show the modal using Bootstrap's modal API
+      var deleteModal = new bootstrap.Modal(
+        document.getElementById("deleteModal"),
+      );
+      deleteModal.show();
+    };
+
+    $scope.confirmDelete = function () {
+      if ($scope.deleteId) {
+        MedicineService.deleteMedicine($scope.deleteId).then(function () {
+          $scope.loadMedicines();
+          $scope.deleteId = null;
+          // Hide the modal
+          var deleteModal = bootstrap.Modal.getInstance(
+            document.getElementById("deleteModal"),
+          );
+          if (deleteModal) {
+            deleteModal.hide();
+          }
+        });
+      }
     };
 
     // ================= UTILS =================

@@ -3,9 +3,14 @@ app.controller(
   function ($scope, $routeParams, UserService, $location) {
     console.log("UserDetailController loaded");
     console.log("Route params:", $routeParams);
-    
+
     $scope.user = null;
     $scope.loading = true;
+    $scope.deleteId = null;
+
+    // User form variables
+    $scope.currentUser = {};
+    $scope.isEdit = false;
 
     $scope.loadUser = function () {
       console.log("Loading user with ID:", $routeParams.id);
@@ -32,18 +37,35 @@ app.controller(
     };
 
     $scope.editUser = function () {
-      $location.path('/users');
-      setTimeout(function () {
-        angular.element('#userModal').modal('show');
-        angular.element('#userModal').scope().editUser($scope.user);
-      }, 100);
+      $scope.isEdit = true;
+      $scope.currentUser = angular.copy($scope.user);
+      // Show the modal using Bootstrap's modal API
+      var userModal = new bootstrap.Modal(document.getElementById("userModal"));
+      userModal.show();
     };
 
     $scope.deleteUser = function () {
-      if (confirm("Are you sure you want to delete this user?")) {
-        UserService.deleteUser($scope.user.id)
+      $scope.deleteId = $scope.user.id;
+      // Show the modal using Bootstrap's modal API
+      var deleteModal = new bootstrap.Modal(
+        document.getElementById("deleteModal"),
+      );
+      deleteModal.show();
+    };
+
+    $scope.confirmDelete = function () {
+      if ($scope.deleteId) {
+        UserService.deleteUser($scope.deleteId)
           .then(function () {
-            $location.path('/users');
+            $location.path("/users");
+            $scope.deleteId = null;
+            // Hide the modal
+            var deleteModal = bootstrap.Modal.getInstance(
+              document.getElementById("deleteModal"),
+            );
+            if (deleteModal) {
+              deleteModal.hide();
+            }
           })
           .catch(function (error) {
             console.error("Error deleting user", error);
@@ -54,7 +76,9 @@ app.controller(
 
     $scope.sendEmail = function () {
       var emailSubject = encodeURIComponent("Regarding your account");
-      var emailBody = encodeURIComponent(`Dear ${$scope.user.name},\n\nThis is a message from PharmaCare regarding your account.\n\nBest regards,\nPharmaCare Team`);
+      var emailBody = encodeURIComponent(
+        `Dear ${$scope.user.name},\n\nThis is a message from PharmaCare regarding your account.\n\nBest regards,\nPharmaCare Team`,
+      );
       window.location.href = `mailto:${$scope.user.email}?subject=${emailSubject}&body=${emailBody}`;
     };
 
@@ -64,16 +88,16 @@ app.controller(
         ===========================
         Name: ${$scope.user.name}
         Email: ${$scope.user.email}
-        Phone: ${$scope.user.phone || 'Not provided'}
-        Address: ${$scope.user.address || 'Not provided'}
-        Role: ${$scope.user.role || 'customer'}
-        Status: ${$scope.user.status || 'active'}
+        Phone: ${$scope.user.phone || "Not provided"}
+        Address: ${$scope.user.address || "Not provided"}
+        Role: ${$scope.user.role || "customer"}
+        Status: ${$scope.user.status || "active"}
         User ID: #${$scope.user.id}
         Date Added: ${new Date($scope.user.created_at).toLocaleDateString()}
         Last Updated: ${new Date($scope.user.updated_at).toLocaleDateString()}
       `;
-      
-      var printWindow = window.open('', '_blank');
+
+      var printWindow = window.open("", "_blank");
       printWindow.document.write(`
         <html>
           <head>
@@ -91,6 +115,43 @@ app.controller(
         </html>
       `);
       printWindow.document.close();
+    };
+
+    // ================= USER FORM FUNCTIONS =================
+
+    $scope.saveUser = function () {
+      if ($scope.isEdit) {
+        $scope.updateUser();
+      }
+    };
+
+    $scope.updateUser = function () {
+      UserService.updateUser($scope.currentUser.id, $scope.currentUser)
+        .then(function (response) {
+          console.log("User updated successfully:", response);
+          $scope.loadUser();
+          $scope.resetForm();
+          // Close the modal with a timeout to ensure DOM is ready
+          setTimeout(function () {
+            var userModal = bootstrap.Modal.getInstance(
+              document.getElementById("userModal"),
+            );
+            if (userModal) {
+              userModal.hide();
+            } else {
+              // Fallback to jQuery method
+              angular.element("#userModal").modal("hide");
+            }
+          }, 100);
+        })
+        .catch(function (error) {
+          console.error("Error updating user", error);
+        });
+    };
+
+    $scope.resetForm = function () {
+      $scope.isEdit = false;
+      $scope.currentUser = {};
     };
 
     $scope.loadUser();
