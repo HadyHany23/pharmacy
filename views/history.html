@@ -9,7 +9,12 @@
         <div class="row">
           <div class="col-md-3">
             <label>Search Customer</label>
-            <input type="text" class="form-control" ng-model="searchCustomer" placeholder="Name or Phone..." />
+            <input
+              type="text"
+              class="form-control"
+              ng-model="searchCustomer"
+              placeholder="Name or Phone..."
+            />
           </div>
           <div class="col-md-2">
             <label>From Date</label>
@@ -33,13 +38,15 @@
   </div>
 
   <div class="panel panel-default border-0 shadow">
-    <table class="table table-hover align-middle">
+    <table class="table table-hover align-middle mb-0">
       <thead class="bg-primary text-white">
         <tr>
           <th ng-click="sortReverse = !sortReverse" style="cursor: pointer">
             Date
-            <i class="glyphicon"
-              ng-class="sortReverse ? 'glyphicon-sort-by-attributes-alt' : 'glyphicon-sort-by-attributes'"></i>
+            <i
+              class="glyphicon"
+              ng-class="sortReverse ? 'glyphicon-sort-by-attributes-alt' : 'glyphicon-sort-by-attributes'"
+            ></i>
           </th>
           <th>Order ID</th>
           <th>Customer Name</th>
@@ -48,7 +55,9 @@
           <th class="text-center">Action</th>
         </tr>
       </thead>
-      <tbody ng-repeat="order in orders | filter:customerFilter | filter:dateFilter | orderBy:'created_at':sortReverse">
+      <tbody
+        ng-repeat="order in (filteredList = (orders | filter:customerFilter | filter:dateFilter | orderBy:'created_at':sortReverse)) | limitTo:pageSize:currentPage*pageSize"
+      >
         <tr>
           <td>{{order.created_at | date:'MMM d, y h:mm a'}}</td>
           <td><code>#{{order.id.split('-')[0]}}</code></td>
@@ -58,7 +67,10 @@
             <strong>{{order.total_price | currency}}</strong>
           </td>
           <td class="text-center">
-            <button class="btn btn-info btn-xs" ng-click="order.expanded = !order.expanded">
+            <button
+              class="btn btn-info btn-xs"
+              ng-click="order.expanded = !order.expanded"
+            >
               {{order.expanded ? 'Hide Details' : 'View Items'}}
             </button>
           </td>
@@ -94,8 +106,54 @@
       </tbody>
     </table>
 
-    <div ng-if="(orders | filter:customerFilter | filter:dateFilter).length === 0" class="text-center p-5">
+    <div ng-if="filteredList.length === 0 && !loading" class="text-center p-5">
       <h4 class="text-muted">No records found matching your filters.</h4>
+    </div>
+
+    <div
+      class="panel-footer bg-white d-flex justify-content-between align-items-center py-3 border-top"
+      style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+      "
+    >
+      <div
+        class="d-flex align-items-center"
+        style="display: flex; align-items: center"
+      >
+        <div class="d-flex align-items-center gap-2">
+          <label class="text-muted small mb-0">Show:</label>
+          <select
+            class="form-select form-select-sm"
+            style="width: auto"
+            ng-model="pageSize"
+            ng-options="size for size in [5, 10, 20, 50]"
+          ></select>
+        </div>
+        <div class="text-muted small border-left ps-3">
+          Page <strong>{{currentPage + 1}}</strong> of {{numberOfPages()}}
+          <span class="ml-2">({{filteredList.length}} total items)</span>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button
+          class="btn btn-sm btn-outline-primary"
+          ng-disabled="currentPage == 0"
+          ng-click="currentPage = currentPage - 1"
+        >
+          <i class="glyphicon glyphicon-chevron-left"></i> Previous
+        </button>
+        <button
+          class="btn btn-sm btn-outline-primary"
+          ng-disabled="currentPage >= numberOfPages() - 1"
+          ng-click="currentPage = currentPage + 1"
+        >
+          Next <i class="glyphicon glyphicon-chevron-right"></i>
+        </button>
+      </div>
     </div>
   </div>
 </div>

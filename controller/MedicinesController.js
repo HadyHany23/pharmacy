@@ -59,7 +59,7 @@ app.controller(
       if ($scope.sortColumn === column) {
         return $scope.sortReverse ? "bi-arrow-down" : "bi-arrow-up";
       }
-      return "bi-arrow-down-up"; // Default two-way arrow icon
+      return "bi-arrow-down-up";
     };
 
     $scope.addToCart = function (medicine) {

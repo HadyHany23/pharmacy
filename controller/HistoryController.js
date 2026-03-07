@@ -1,67 +1,60 @@
-app.controller("HistoryController", function ($scope, $http, SB_CONFIG) {
-  $scope.orders = [];
-  $scope.filteredOrders = [];
-  $scope.loading = true;
-
-  // Filter Models
-  $scope.searchCustomer = "";
-  $scope.startDate = null;
-  $scope.endDate = null;
-  $scope.sortReverse = true; // Default to Newest first
-
-  const QUERY =
-    "orders?select=*,customers(name,phone),order_items(*,medicines(name))&order=created_at.desc";
-
-  $scope.loadHistory = function () {
+app.controller(
+  "HistoryController",
+  function ($scope, $http, SB_CONFIG, $filter) {
+    $scope.orders = [];
     $scope.loading = true;
-    $http
-      .get(SB_CONFIG.URL + QUERY, { headers: SB_CONFIG.HEADERS() })
-      .then(function (res) {
-        $scope.orders = res.data;
-      })
-      .finally(function () {
-        $scope.loading = false;
-      });
-  };
 
-  // The Custom Date Filter Logic
-  $scope.dateFilter = function (order) {
-    if (!$scope.startDate && !$scope.endDate) return true;
-
-    const orderDate = new Date(order.created_at);
-    orderDate.setHours(0, 0, 0, 0); // Normalize to start of day
-
-    if ($scope.startDate && orderDate < new Date($scope.startDate))
-      return false;
-    if ($scope.endDate && orderDate > new Date($scope.endDate)) return false;
-
-    return true;
-  };
-
-  // Custom filter for customer name and phone
-  $scope.customerFilter = function (order) {
-    if (!$scope.searchCustomer) return true;
-
-    const searchTerm = $scope.searchCustomer.toLowerCase();
-    const customerName =
-      order.customers && order.customers.name
-        ? order.customers.name.toLowerCase()
-        : "";
-    const customerPhone =
-      order.customers && order.customers.phone
-        ? order.customers.phone.toLowerCase()
-        : "";
-
-    return (
-      customerName.includes(searchTerm) || customerPhone.includes(searchTerm)
-    );
-  };
-
-  $scope.resetFilters = function () {
+    // Search & Filter state
     $scope.searchCustomer = "";
     $scope.startDate = null;
     $scope.endDate = null;
-  };
+    $scope.sortReverse = true;
 
-  $scope.loadHistory();
-});
+    // --- ADDED PAGINATION VARIABLES ---
+    $scope.currentPage = 0;
+    $scope.pageSize = 10; // Default to 10 for history
+
+    const QUERY =
+      "orders?select=*,customers(name,phone),order_items(*,medicines(name))&order=created_at.desc";
+
+    $scope.loadHistory = function () {
+      $scope.loading = true;
+      $http
+        .get(SB_CONFIG.URL + QUERY, { headers: SB_CONFIG.HEADERS() })
+        .then(function (res) {
+          $scope.orders = res.data;
+        })
+        .finally(function () {
+          $scope.loading = false;
+        });
+    };
+
+    // --- ADDED PAGINATION LOGIC ---
+    $scope.numberOfPages = function () {
+      // We apply the same filters used in the table to get the correct count
+      let filtered = $filter("filter")($scope.orders, $scope.customerFilter);
+      filtered = $filter("filter")(filtered, $scope.dateFilter);
+
+      return Math.ceil(filtered.length / $scope.pageSize) || 1;
+    };
+
+    // Reset page to 0 when filters change
+    $scope.$watchGroup(
+      ["searchCustomer", "startDate", "endDate", "pageSize"],
+      function () {
+        $scope.currentPage = 0;
+      },
+    );
+
+    // ... (Keep your dateFilter and customerFilter functions exactly as they are) ...
+
+    $scope.resetFilters = function () {
+      $scope.searchCustomer = "";
+      $scope.startDate = null;
+      $scope.endDate = null;
+      $scope.currentPage = 0;
+    };
+
+    $scope.loadHistory();
+  },
+);
