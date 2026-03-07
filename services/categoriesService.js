@@ -7,12 +7,10 @@ app.service("CategoryService", function ($http, SB_CONFIG) {
   };
 
   this.addCategory = function (categoryName) {
-    // Supabase expects an object { name: "Value" }
     return $http.post(URL, { name: categoryName }, config);
   };
 
   this.deleteCategory = function (categoryId) {
-    // Supabase REST delete requires a filter in the URL
     return $http.delete(URL + "?id=eq." + categoryId, config);
   };
 });

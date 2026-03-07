@@ -1,5 +1,4 @@
 app.service("MedicineService", function ($http, SB_CONFIG) {
-  // Services only need $http and your config
   const TABLE_URL = SB_CONFIG.URL + "medicines";
   const getConfig = { headers: SB_CONFIG.HEADERS() };
 

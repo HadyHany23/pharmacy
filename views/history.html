@@ -9,12 +9,7 @@
         <div class="row">
           <div class="col-md-3">
             <label>Search Customer</label>
-            <input
-              type="text"
-              class="form-control"
-              ng-model="searchCustomer"
-              placeholder="Name or Phone..."
-            />
+            <input type="text" class="form-control" ng-model="searchCustomer" placeholder="Name or Phone..." />
           </div>
           <div class="col-md-2">
             <label>From Date</label>
@@ -43,10 +38,8 @@
         <tr>
           <th ng-click="sortReverse = !sortReverse" style="cursor: pointer">
             Date
-            <i
-              class="glyphicon"
-              ng-class="sortReverse ? 'glyphicon-sort-by-attributes-alt' : 'glyphicon-sort-by-attributes'"
-            ></i>
+            <i class="glyphicon"
+              ng-class="sortReverse ? 'glyphicon-sort-by-attributes-alt' : 'glyphicon-sort-by-attributes'"></i>
           </th>
           <th>Order ID</th>
           <th>Customer Name</th>
@@ -55,9 +48,7 @@
           <th class="text-center">Action</th>
         </tr>
       </thead>
-      <tbody
-        ng-repeat="order in orders | filter:{customers: {name: searchCustomer}} | filter:dateFilter | orderBy:'created_at':sortReverse"
-      >
+      <tbody ng-repeat="order in orders | filter:customerFilter | filter:dateFilter | orderBy:'created_at':sortReverse">
         <tr>
           <td>{{order.created_at | date:'MMM d, y h:mm a'}}</td>
           <td><code>#{{order.id.split('-')[0]}}</code></td>
@@ -67,10 +58,7 @@
             <strong>{{order.total_price | currency}}</strong>
           </td>
           <td class="text-center">
-            <button
-              class="btn btn-info btn-xs"
-              ng-click="order.expanded = !order.expanded"
-            >
+            <button class="btn btn-info btn-xs" ng-click="order.expanded = !order.expanded">
               {{order.expanded ? 'Hide Details' : 'View Items'}}
             </button>
           </td>
@@ -106,10 +94,7 @@
       </tbody>
     </table>
 
-    <div
-      ng-if="(orders | filter:{customers: {name: searchCustomer}} | filter:dateFilter).length === 0"
-      class="text-center p-5"
-    >
+    <div ng-if="(orders | filter:customerFilter | filter:dateFilter).length === 0" class="text-center p-5">
       <h4 class="text-muted">No records found matching your filters.</h4>
     </div>
   </div>

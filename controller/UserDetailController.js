@@ -8,7 +8,6 @@ app.controller(
     $scope.loading = true;
     $scope.deleteId = null;
 
-    // User form variables
     $scope.currentUser = {};
     $scope.isEdit = false;
 
@@ -39,14 +38,12 @@ app.controller(
     $scope.editUser = function () {
       $scope.isEdit = true;
       $scope.currentUser = angular.copy($scope.user);
-      // Show the modal using Bootstrap's modal API
       var userModal = new bootstrap.Modal(document.getElementById("userModal"));
       userModal.show();
     };
 
     $scope.deleteUser = function () {
       $scope.deleteId = $scope.user.id;
-      // Show the modal using Bootstrap's modal API
       var deleteModal = new bootstrap.Modal(
         document.getElementById("deleteModal"),
       );
@@ -116,8 +113,6 @@ app.controller(
       `);
       printWindow.document.close();
     };
-
-    // ================= USER FORM FUNCTIONS =================
 
     $scope.saveUser = function () {
       if ($scope.isEdit) {

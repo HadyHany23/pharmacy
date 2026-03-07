@@ -46,8 +46,6 @@ app.controller(
       $scope.currentPage = 0;
     });
 
-    // ================= SORTING LOGIC =================
-
     $scope.sortData = function (column) {
       if ($scope.sortColumn === column) {
         $scope.sortReverse = !$scope.sortReverse;
@@ -63,8 +61,6 @@ app.controller(
       }
       return "bi-arrow-down-up"; // Default two-way arrow icon
     };
-
-    // ================= CASHIER / CART LOGIC =================
 
     $scope.addToCart = function (medicine) {
       // Find if the item is already in the cart to check combined quantity
@@ -100,8 +96,6 @@ app.controller(
         timerProgressBar: true,
       });
     };
-
-    // ================= CATEGORY LOGIC =================
 
     $scope.loadCategories = function () {
       CategoryService.getCategories()
@@ -202,8 +196,6 @@ app.controller(
       }
     };
 
-    // ================= MEDICINE LOGIC =================
-
     $scope.loadMedicines = function () {
       $scope.loading = true;
       MedicineService.getMedicines()
@@ -286,8 +278,6 @@ app.controller(
         });
       }
     };
-
-    // ================= UTILS =================
 
     $scope.isExpired = function (dateStr) {
       if (!dateStr) return false;

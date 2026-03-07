@@ -32,8 +32,6 @@ app.controller("UsersController", function ($scope, UserService) {
     return "bi-arrow-down-up";
   };
 
-  // ================= USER LOGIC =================
-
   $scope.loadUsers = function () {
     $scope.loading = true;
     UserService.getUsers()
@@ -52,7 +50,10 @@ app.controller("UsersController", function ($scope, UserService) {
     // Duplicate Email Check (Only for NEW users)
     if (!$scope.isEdit) {
       const emailExists = $scope.users.some(
-        (u) => u.email.toLowerCase() === $scope.currentUser.email.toLowerCase(),
+        (u) =>
+          u.email &&
+          $scope.currentUser.email &&
+          u.email.toLowerCase() === $scope.currentUser.email.toLowerCase(),
       );
 
       if (emailExists) {
@@ -66,7 +67,10 @@ app.controller("UsersController", function ($scope, UserService) {
 
       // Duplicate Phone Check (Only for NEW users)
       const phoneExists = $scope.users.some(
-        (u) => u.phone === $scope.currentUser.phone,
+        (u) =>
+          u.phone &&
+          $scope.currentUser.phone &&
+          u.phone === $scope.currentUser.phone,
       );
 
       if (phoneExists) {
@@ -155,8 +159,6 @@ app.controller("UsersController", function ($scope, UserService) {
         });
     }
   };
-
-  // ================= UTILS =================
 
   $scope.resetForm = function () {
     $scope.isEdit = false;
