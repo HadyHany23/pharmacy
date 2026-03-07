@@ -23,6 +23,29 @@ app.controller(
     $scope.newCategoryName = "";
     $scope.categoryError = "";
 
+    // Pagination Variables
+    $scope.currentPage = 0;
+    $scope.pageSize = 5;
+
+    // Function to calculate total pages (needed for the buttons)
+    $scope.numberOfPages = function () {
+      // We filter the medicines first so the page count is correct when searching
+      let filtered = $scope.medicines.filter((med) => {
+        let matchesSearch =
+          !$scope.searchQuery ||
+          med.name.toLowerCase().includes($scope.searchQuery.toLowerCase());
+        let matchesCat =
+          !$scope.selectedCategory || med.category === $scope.selectedCategory;
+        return matchesSearch && matchesCat;
+      });
+      return Math.ceil(filtered.length / $scope.pageSize);
+    };
+
+    // Reset to page 0 when searching or changing category
+    $scope.$watchGroup(["searchQuery", "selectedCategory"], function () {
+      $scope.currentPage = 0;
+    });
+
     // ================= SORTING LOGIC =================
 
     $scope.sortData = function (column) {
