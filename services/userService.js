@@ -1,5 +1,4 @@
 app.service("UserService", function ($http, SB_CONFIG) {
-  // Use SB_CONFIG.URL which should already have /rest/v1/
   const TABLE_URL = SB_CONFIG.URL + "customers";
   const getConfig = { headers: SB_CONFIG.HEADERS() };
 

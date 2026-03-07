@@ -11,7 +11,26 @@ app.controller("UsersController", function ($scope, UserService) {
   // Delete confirmation state
   $scope.deleteId = null;
 
-  // ================= USER LOGIC =================
+  // Add these with your other variables at the top
+  $scope.sortColumn = "name"; // Default sort by name
+  $scope.sortReverse = false;
+
+  // ================= SORTING LOGIC =================
+  $scope.sortData = function (column) {
+    if ($scope.sortColumn === column) {
+      $scope.sortReverse = !$scope.sortReverse;
+    } else {
+      $scope.sortColumn = column;
+      $scope.sortReverse = false;
+    }
+  };
+
+  $scope.getSortClass = function (column) {
+    if ($scope.sortColumn === column) {
+      return $scope.sortReverse ? "bi-arrow-down" : "bi-arrow-up";
+    }
+    return "bi-arrow-down-up";
+  };
 
   $scope.loadUsers = function () {
     $scope.loading = true;
@@ -31,7 +50,10 @@ app.controller("UsersController", function ($scope, UserService) {
     // Duplicate Email Check (Only for NEW users)
     if (!$scope.isEdit) {
       const emailExists = $scope.users.some(
-        (u) => u.email.toLowerCase() === $scope.currentUser.email.toLowerCase(),
+        (u) =>
+          u.email &&
+          $scope.currentUser.email &&
+          u.email.toLowerCase() === $scope.currentUser.email.toLowerCase(),
       );
 
       if (emailExists) {
@@ -45,7 +67,10 @@ app.controller("UsersController", function ($scope, UserService) {
 
       // Duplicate Phone Check (Only for NEW users)
       const phoneExists = $scope.users.some(
-        (u) => u.phone === $scope.currentUser.phone,
+        (u) =>
+          u.phone &&
+          $scope.currentUser.phone &&
+          u.phone === $scope.currentUser.phone,
       );
 
       if (phoneExists) {
@@ -134,8 +159,6 @@ app.controller("UsersController", function ($scope, UserService) {
         });
     }
   };
-
-  // ================= UTILS =================
 
   $scope.resetForm = function () {
     $scope.isEdit = false;

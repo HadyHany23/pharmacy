@@ -1,5 +1,5 @@
 <div class="row justify-content-center" style="margin-top: 80px">
-  <div class="col-md-5 col-lg-4">
+  <div class="col-md-12 col-lg-6">
     <div class="card shadow border-0">
       <div class="card-body p-5">
         <div class="text-center mb-4">
@@ -7,34 +7,58 @@
           <p class="text-muted">Enter your username to begin</p>
         </div>
 
-        <form ng-submit="handleLogin()">
+        <form name="loginForm" ng-submit="handleLogin()" novalidate>
           <div class="mb-3">
-            <label class="form-label">Username</label>
+            <label class="form-label"
+              >Username <span class="text-danger">*</span></label
+            >
             <input
               type="text"
+              name="username"
               class="form-control"
               ng-model="loginData.username"
+              ng-minlength="4"
               required
               placeholder="e.g. admin"
+              ng-class="{'is-invalid': loginForm.username.$dirty && loginForm.username.$invalid, 'is-valid': loginForm.username.$valid}"
             />
+            <div
+              class="invalid-feedback"
+              ng-show="loginForm.username.$dirty && loginForm.username.$invalid"
+            >
+              Username must be more than 3 characters.
+            </div>
           </div>
 
           <div class="mb-4">
-            <label class="form-label">Password</label>
+            <label class="form-label"
+              >Password <span class="text-danger">*</span></label
+            >
             <input
               type="password"
+              name="password"
               class="form-control"
               ng-model="loginData.password"
+              ng-minlength="8"
+              maxlength="12"
               required
-              placeholder="••••••"
+              placeholder="••••••••"
+              ng-class="{'is-invalid': loginForm.password.$dirty && loginForm.password.$invalid, 'is-valid': loginForm.password.$valid}"
             />
+            <div
+              class="invalid-feedback"
+              ng-show="loginForm.password.$dirty && loginForm.password.$invalid"
+            >
+              Password must be more than 7 characters.
+            </div>
           </div>
 
           <button
             class="btn btn-primary w-100 py-2 mb-3"
             type="submit"
-            ng-disabled="loading"
+            ng-disabled="loginForm.$invalid || loading"
           >
+            <i class="bi bi-shield-lock me-2"></i>
             {{ loading ? 'Verifying...' : 'Sign In' }}
           </button>
 

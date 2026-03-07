@@ -1,5 +1,5 @@
 <div class="row justify-content-center" style="margin-top: 50px">
-  <div class="col-md-6 col-lg-5">
+  <div class="col-md-12 col-lg-6">
     <div class="card shadow border-0">
       <div class="card-body p-5">
         <div class="text-center mb-4">
@@ -7,43 +7,103 @@
           <p class="text-muted">Create a new account and assign a role</p>
         </div>
 
-        <form ng-submit="handleRegister()">
-          <div class="mb-3">
-            <label class="form-label">Full Name</label>
-            <input
-              type="text"
-              class="form-control"
-              ng-model="regUser.full_name"
-              required
-              placeholder="John Doe"
-            />
-          </div>
+        <form name="regForm" ng-submit="handleRegister()" novalidate>
+          <form name="regForm" novalidate>
+            <div class="mb-3">
+              <label class="form-label"
+                >Full Name <span class="text-danger">*</span></label
+              >
+              <input
+                type="text"
+                name="fullName"
+                class="form-control"
+                ng-model="regUser.full_name"
+                required
+                ng-minlength="4"
+                maxlength="20"
+                placeholder="John Doe"
+                ng-class="{'is-invalid': regForm.fullName.$dirty && regForm.fullName.$invalid, 'is-valid': regForm.fullName.$valid}"
+              />
+
+              <div class="invalid-feedback">
+                Full name must be at least 4 characters.
+              </div>
+            </div>
+          </form>
 
           <div class="mb-3">
-            <label class="form-label">Username</label>
+            <label class="form-label"
+              >Username <span class="text-danger">*</span></label
+            >
             <input
               type="text"
+              name="username"
               class="form-control"
               ng-model="regUser.username"
+              ng-minlength="4"
+              maxlength="20"
               required
               placeholder="johndoe123"
+              ng-class="{'is-invalid': regForm.username.$dirty && regForm.username.$invalid}"
             />
+            <div class="invalid-feedback">
+              Username must be at least 4 characters.
+            </div>
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Password</label>
+            <label class="form-label"
+              >Password <span class="text-danger">*</span></label
+            >
             <input
               type="password"
+              name="password"
               class="form-control"
               ng-model="regUser.password"
+              ng-minlength="8"
+              maxlength="12"
               required
-              placeholder="Set a password"
+              placeholder="Min. 8 characters"
+              ng-class="{'is-invalid': regForm.password.$dirty && regForm.password.$invalid}"
             />
+            <div class="invalid-feedback">
+              Password must be at least 8 characters.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label"
+              >Confirm Password <span class="text-danger">*</span></label
+            >
+            <input
+              type="password"
+              name="confirmPassword"
+              class="form-control"
+              ng-model="regUser.confirm_password"
+              maxlength="12"
+              required
+              placeholder="Re-enter password"
+              ng-class="{'is-invalid': regUser.confirm_password && regUser.password !== regUser.confirm_password}"
+            />
+            <div
+              class="text-danger small"
+              ng-show="regUser.confirm_password && regUser.password !== regUser.confirm_password"
+            >
+              Passwords do not match!
+            </div>
           </div>
 
           <div class="mb-4">
-            <label class="form-label">Assign Role</label>
-            <select class="form-select" ng-model="regUser.role_id" required>
+            <label class="form-label"
+              >Assign Role <span class="text-danger">*</span></label
+            >
+            <select
+              name="role"
+              class="form-select"
+              ng-model="regUser.role_id"
+              required
+              ng-class="{'is-invalid': regForm.role.$dirty && regForm.role.$invalid}"
+            >
               <option value="">-- Choose Role --</option>
               <option ng-repeat="r in roles" value="{{r.id}}">
                 {{r.name}}
@@ -54,15 +114,15 @@
           <button
             class="btn btn-success w-100 py-2 mb-3"
             type="submit"
-            ng-disabled="loading"
+            ng-disabled="regForm.$invalid || regUser.password !== regUser.confirm_password || loading"
           >
+            <i class="bi bi-person-plus me-2"></i>
             {{ loading ? 'Saving...' : 'Create Staff Account' }}
           </button>
 
           <div class="text-center">
-            <a href="#!/login" class="text-decoration-none small"
-              >Already have an account? Login</a
-            >
+            Already have an account?
+            <a href="#!/login" class="text-decoration-none small"> Login</a>
           </div>
         </form>
       </div>

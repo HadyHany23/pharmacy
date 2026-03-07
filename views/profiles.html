@@ -1,189 +1,277 @@
-<div class="container">
-  <h2 class="text-center">Staff Management</h2>
+<div class="container fade-in">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark">
+      <i class="bi bi-people me-2"></i>Staff Management
+    </h2>
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <strong
-        >{{ isEdit ? 'Edit Staff Profile' : 'Register New Staff' }}</strong
-      >
-    </div>
+    <button
+      class="btn btn-primary shadow-sm"
+      ng-if="getUserRole() === 'admin'"
+      ng-click="resetForm()"
+      data-bs-toggle="modal"
+      data-bs-target="#profileModal"
+    >
+      <i class="bi bi-person-plus me-1"></i> Register New Staff
+    </button>
+  </div>
 
-    <div class="panel-body">
-      <form
-        name="profileForm"
-        ng-submit="profileForm.$valid && saveProfile()"
-        novalidate
-      >
-        <div class="row">
-          <div
-            class="col-md-3 form-group"
-            ng-class="{'has-error': profileForm.full_name.$touched && profileForm.full_name.$invalid}"
-          >
-            <label>Full Name</label>
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body bg-white rounded">
+      <div class="row g-3">
+        <div class="col-md-12">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+              <i class="bi bi-search"></i>
+            </span>
             <input
               type="text"
-              name="full_name"
-              class="form-control"
-              ng-model="currentProfile.full_name"
-              required
-            />
-            <small
-              class="help-block"
-              ng-if="profileForm.full_name.$touched && profileForm.full_name.$error.required"
-              >Required</small
-            >
-          </div>
-
-          <div
-            class="col-md-3 form-group"
-            ng-class="{'has-error': profileForm.username.$touched && profileForm.username.$invalid}"
-          >
-            <label>Username</label>
-            <input
-              type="text"
-              name="username"
-              class="form-control"
-              ng-model="currentProfile.username"
-              required
-            />
-            <small
-              class="help-block"
-              ng-if="profileForm.username.$touched && profileForm.username.$error.required"
-              >Required</small
-            >
-          </div>
-
-          <div class="col-md-3 form-group">
-            <label>Assigned Role</label>
-            <div class="input-group">
-              <select
-                class="form-control"
-                ng-model="currentProfile.role_id"
-                required
-              >
-                <option value="">Select Role</option>
-                <option ng-repeat="role in roles" value="{{role.id}}">
-                  {{role.name}}
-                </option>
-              </select>
-              <span class="input-group-btn">
-                <button
-                  class="btn btn-primary"
-                  type="button"
-                  title="Add New Role"
-                  ng-click="addNewRole()"
-                >
-                  Add
-                </button>
-              </span>
-            </div>
-          </div>
-
-          <div class="col-md-3 form-group">
-            <label>Password</label>
-            <input
-              type="text"
-              class="form-control"
-              ng-model="currentProfile.password"
-              placeholder="{{ isEdit ? 'Update password' : 'Set password' }}"
-              required
+              class="form-control border-start-0"
+              placeholder="Search by name or username..."
+              ng-model="searchQuery"
             />
           </div>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <div class="row">
-          <div class="col-md-12 text-right">
+  <div ng-if="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2 text-muted">Loading Staff List...</p>
+  </div>
+
+  <div class="card border-0 shadow-sm" ng-if="!loading">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th class="ps-4">Full Name</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Password</th>
+            <th class="text-center pe-4">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white">
+          <tr ng-repeat="p in profiles | filter: searchQuery">
+            <td class="ps-4 fw-bold text-secondary">{{ p.full_name }}</td>
+            <td><code class="text-primary">{{ p.username }}</code></td>
+            <td>
+              <span class="badge bg-info text-dark">
+                {{ p.roles.name || 'No Role' }}
+              </span>
+            </td>
+            <td class="text-muted small">{{ p.password }}</td>
+            <td class="text-center pe-4">
+              <div class="btn-group gap-2">
+                <button
+                  class="btn btn-outline-warning btn-sm"
+                  ng-click="editProfile(p)"
+                  data-bs-toggle="modal"
+                  data-bs-target="#profileModal"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button
+                  class="btn btn-outline-danger btn-sm"
+                  ng-click="deleteProfile(p.id)"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr ng-if="(profiles | filter: searchQuery).length === 0">
+            <td colspan="5" class="text-center py-4 text-muted">
+              No staff members found matching your search.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div
+    class="modal fade"
+    id="profileModal"
+    tabindex="-1"
+    aria-hidden="true"
+    ng-if="getUserRole() === 'admin'"
+  >
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title">
+            {{ isEdit ? 'Edit Staff Profile' : 'Register New Staff' }}
+          </h5>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <form
+          name="profileForm"
+          ng-submit="profileForm.$valid && saveProfile()"
+          novalidate
+        >
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Full Name</label>
+                <input
+                  type="text"
+                  name="full_name"
+                  class="form-control"
+                  ng-model="currentProfile.full_name"
+                  ng-minlength="4"
+                  ng-class="{'is-invalid': profileForm.full_name.$touched && profileForm.full_name.$invalid}"
+                  required
+                />
+                <div class="invalid-feedback">
+                  Full name must be at least 4 characters.
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Username</label>
+                <input
+                  type="text"
+                  name="username"
+                  class="form-control"
+                  ng-model="currentProfile.username"
+                  ng-minlength="4"
+                  ng-class="{'is-invalid': profileForm.username.$touched && profileForm.username.$invalid}"
+                  required
+                />
+                <div class="invalid-feedback">
+                  Username must be at least 4 characters.
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Assigned Role</label>
+                <div class="input-group">
+                  <select
+                    class="form-select"
+                    ng-model="currentProfile.role_id"
+                    required
+                  >
+                    <option value="">Select Role</option>
+                    <option ng-repeat="role in roles" value="{{role.id}}">
+                      {{role.name}}
+                    </option>
+                  </select>
+
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    title="Add New Role"
+                    data-bs-toggle="modal"
+                    data-bs-target="#roleModal"
+                  >
+                    Add Role
+                  </button>
+
+                  <button
+                    class="btn btn-outline-danger"
+                    type="button"
+                    title="Delete Selected Role"
+                    ng-click="removeRole()"
+                    ng-disabled="!currentProfile.role_id"
+                  >
+                    Delete Role
+                  </button>
+                </div>
+                <small class="text-muted" ng-if="currentProfile.role_id">
+                  Select a role above to delete it.
+                </small>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Password</label>
+                <input
+                  type="text"
+                  name="password"
+                  class="form-control"
+                  ng-model="currentProfile.password"
+                  ng-minlength="7"
+                  placeholder="{{ isEdit ? 'Update password' : 'Set password' }}"
+                  ng-class="{'is-invalid': profileForm.password.$touched && profileForm.password.$invalid}"
+                  required
+                />
+                <div class="invalid-feedback">
+                  Password must be at least 7 characters.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
             <button
               type="button"
-              class="btn btn-default"
-              ng-if="isEdit"
-              ng-click="cancelEdit()"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
             >
               Cancel
             </button>
             <button
               type="submit"
-              class="btn btn-success"
+              class="btn btn-primary px-4"
+              data-bs-dismiss="modal"
               ng-disabled="profileForm.$invalid"
             >
-              <i
-                class="glyphicon"
-                ng-class="isEdit ? 'glyphicon-save' : 'glyphicon-user'"
-              ></i>
               {{ isEdit ? 'Update Profile' : 'Create Staff Account' }}
             </button>
           </div>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="row" style="margin-bottom: 15px">
-    <div class="col-md-12">
-      <div class="input-group">
-        <span class="input-group-addon"
-          ><i class="glyphicon glyphicon-search"></i
-        ></span>
-        <input
-          type="text"
-          class="form-control"
-          placeholder="Search by name or username..."
-          ng-model="searchQuery"
-        />
+        </form>
       </div>
     </div>
   </div>
+</div>
 
-  <div ng-if="loading" class="text-center">
-    <span class="glyphicon glyphicon-refresh glyphicon-spin"></span>
-    Loading Staff List...
-  </div>
+<!-- Role Input Modal -->
+<div class="modal fade" id="roleModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-person-badge me-2"></i>Add New Role
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
 
-  <div class="panel panel-info" ng-if="!loading">
-    <div class="panel-heading">
-      <strong>Active Staff Members</strong>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-bold"> Enter new role name: </label>
+
+          <input
+            type="text"
+            class="form-control"
+            ng-model="newRoleName"
+            placeholder="e.g. Pharmacist"
+          />
+        </div>
+
+        <div ng-if="roleError" class="alert alert-danger">{{ roleError }}</div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+
+        <button class="btn btn-primary" ng-click="confirmAddRole()">
+          Add Role
+        </button>
+      </div>
     </div>
-
-    <table class="table table-hover table-striped">
-      <thead>
-        <tr class="info">
-          <th>Full Name</th>
-          <th>Username</th>
-          <th>Role ID</th>
-          <th>Password</th>
-          <th width="150" class="text-right">Actions</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr ng-repeat="p in profiles | filter: searchQuery">
-          <td><strong>{{ p.full_name }}</strong></td>
-          <td><code>{{ p.username }}</code></td>
-          <td>
-            <span class="label label-primary"
-              >{{ p.roles.name || 'No Role' }}</span
-            >
-          </td>
-          <td>{{p.password}}</td>
-          <td class="text-right">
-            <button class="btn btn-warning btn-xs" ng-click="editProfile(p)">
-              Edit
-            </button>
-            <button
-              class="btn btn-danger btn-xs"
-              ng-click="deleteProfile(p.id)"
-            >
-              Delete
-            </button>
-          </td>
-        </tr>
-
-        <tr ng-if="(profiles | filter: searchQuery).length === 0">
-          <td colspan="4" class="text-center text-muted">
-            No staff members found matching your search
-          </td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 </div>

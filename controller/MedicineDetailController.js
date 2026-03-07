@@ -142,8 +142,6 @@ app.controller(
       printWindow.document.close();
     };
 
-    // ================= MEDICINE FORM FUNCTIONS =================
-
     $scope.loadCategories = function () {
       // Import CategoryService and use it here
       // For now, we'll use a basic approach
