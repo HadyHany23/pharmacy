@@ -1,35 +1,27 @@
 app.controller(
   "MedicinesController",
   function ($scope, MedicineService, CategoryService, CartService) {
-    // 1. Initialize Variables
     $scope.medicines = [];
     $scope.categories = [];
     $scope.currentMed = {};
     $scope.isEdit = false;
     $scope.loading = false;
 
-    // Search & Filter state
     $scope.searchQuery = "";
     $scope.selectedCategory = "";
 
-    // Sorting state
     $scope.sortColumn = "";
     $scope.sortReverse = false;
 
-    // Delete confirmation state
     $scope.deleteId = null;
 
-    // Category modal state
     $scope.newCategoryName = "";
     $scope.categoryError = "";
 
-    // Pagination Variables
     $scope.currentPage = 0;
     $scope.pageSize = 5;
 
-    // Function to calculate total pages (needed for the buttons)
     $scope.numberOfPages = function () {
-      // We filter the medicines first so the page count is correct when searching
       let filtered = $scope.medicines.filter((med) => {
         let matchesSearch =
           !$scope.searchQuery ||
@@ -41,7 +33,6 @@ app.controller(
       return Math.ceil(filtered.length / $scope.pageSize);
     };
 
-    // Reset to page 0 when searching or changing category
     $scope.$watchGroup(["searchQuery", "selectedCategory"], function () {
       $scope.currentPage = 0;
     });
@@ -63,11 +54,9 @@ app.controller(
     };
 
     $scope.addToCart = function (medicine) {
-      // Find if the item is already in the cart to check combined quantity
       var cartItem = CartService.getCart().find((i) => i.id === medicine.id);
       var currentInCart = cartItem ? cartItem.quantity : 0;
 
-      // 1. Check Stock
       if (currentInCart + 1 > medicine.stock) {
         Swal.fire({
           title: "Out of Stock",
@@ -81,10 +70,8 @@ app.controller(
         return;
       }
 
-      // 2. Add to Cart
       CartService.addToCart(medicine);
 
-      // 3. Success Toast (Top-Right corner)
       Swal.fire({
         title: "Added Successfully!",
         text: medicine.name + " added to your cart.",
@@ -110,7 +97,6 @@ app.controller(
     $scope.addNewCategory = function () {
       $scope.newCategoryName = "";
       $scope.categoryError = "";
-      // Show the modal using Bootstrap's modal API
       var categoryModal = new bootstrap.Modal(
         document.getElementById("categoryModal"),
       );
@@ -118,7 +104,6 @@ app.controller(
     };
 
     $scope.removeCategory = function () {
-      // 1. Find the category object based on the name currently in the dropdown
       const selectedName = $scope.currentMed.category;
       const categoryObj = $scope.categories.find(
         (c) => c.name === selectedName,
@@ -133,7 +118,6 @@ app.controller(
         return;
       }
 
-      // 2. Confirmation Alert
       Swal.fire({
         title: "Delete Category?",
         text: `Are you sure you want to remove "${categoryObj.name}"? This will not delete medicines, but the category will disappear from filters.`,
@@ -144,18 +128,15 @@ app.controller(
         confirmButtonText: "Yes, delete it!",
       }).then((result) => {
         if (result.isConfirmed) {
-          // 3. Call the updated Service
           CategoryService.deleteCategory(categoryObj.id)
             .then(function () {
               Swal.fire("Deleted!", "Category has been removed.", "success");
 
-              // 4. Refresh the UI
               $scope.currentMed.category = ""; // Clear selection
               $scope.loadCategories(); // Reload dropdown list
             })
             .catch(function (err) {
               console.error("Delete failed", err);
-              // If you see 401 here, check your Supabase RLS policies for DELETE
               Swal.fire(
                 "Error",
                 "Delete failed. Check your permissions (401 Unauthorized).",
@@ -185,7 +166,6 @@ app.controller(
           $scope.currentMed.category = newCat;
           $scope.newCategoryName = "";
           $scope.categoryError = "";
-          // Hide the modal
           var categoryModal = bootstrap.Modal.getInstance(
             document.getElementById("categoryModal"),
           );
@@ -241,7 +221,6 @@ app.controller(
     };
 
     $scope.updateMedicine = function () {
-      // We use a copy to ensure we don't send extra UI-only properties to Supabase
       var dataToSave = angular.copy($scope.currentMed);
 
       MedicineService.updateMedicine(dataToSave.id, dataToSave)
@@ -256,7 +235,6 @@ app.controller(
 
     $scope.deleteMedicine = function (id) {
       $scope.deleteId = id;
-      // Show the modal using Bootstrap's modal API
       var deleteModal = new bootstrap.Modal(
         document.getElementById("deleteModal"),
       );
@@ -268,7 +246,6 @@ app.controller(
         MedicineService.deleteMedicine($scope.deleteId).then(function () {
           $scope.loadMedicines();
           $scope.deleteId = null;
-          // Hide the modal
           var deleteModal = bootstrap.Modal.getInstance(
             document.getElementById("deleteModal"),
           );
@@ -295,7 +272,6 @@ app.controller(
       $scope.resetForm();
     };
 
-    // INITIAL LOAD
     $scope.loadMedicines();
     $scope.loadCategories();
   },

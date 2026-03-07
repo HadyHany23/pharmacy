@@ -56,13 +56,11 @@ app.controller(
     };
 
     $scope.removeRole = function () {
-      // 1. Initial check
       if (!$scope.currentProfile.role_id) {
         Swal.fire("Warning", "Please select a role first.", "warning");
         return;
       }
 
-      // 2. SweetAlert Confirmation
       Swal.fire({
         title: "Delete Role?",
         text: "This action cannot be undone. Are you sure you want to delete this role?",
@@ -74,17 +72,14 @@ app.controller(
         cancelButtonText: "Cancel",
       }).then((result) => {
         if (result.isConfirmed) {
-          // 3. Execute Deletion
           RolesService.deleteRole($scope.currentProfile.role_id)
             .then(function () {
               Swal.fire("Deleted", "Role deleted successfully!", "success");
 
-              // Reset UI
               $scope.currentProfile.role_id = "";
               $scope.loadRoles();
             })
             .catch(function (err) {
-              // 4. Specific Error Handling for Foreign Key Constraints
               if (
                 err.status === 409 ||
                 (err.data && err.data.code === "23503")
@@ -193,7 +188,6 @@ app.controller(
         confirmButtonText: "Yes, delete them!",
         cancelButtonText: "Cancel",
       }).then((result) => {
-        // result.isConfirmed is true only if the user clicked the delete button
         if (result.isConfirmed) {
           ProfilesService.deleteProfile(id)
             .then(function () {
@@ -215,8 +209,6 @@ app.controller(
     $scope.cancelEdit = function () {
       $scope.resetForm();
     };
-
-    // INITIAL LOAD
 
     $scope.loadProfiles();
     $scope.loadRoles();

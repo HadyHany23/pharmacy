@@ -1,18 +1,11 @@
 app.controller("UsersController", function ($scope, UserService) {
-  // 1. Initialize Variables
   $scope.users = [];
   $scope.currentUser = {};
   $scope.isEdit = false;
   $scope.loading = false;
-
-  // Search & Filter state
   $scope.searchQuery = "";
-
-  // Delete confirmation state
   $scope.deleteId = null;
-
-  // Add these with your other variables at the top
-  $scope.sortColumn = "name"; // Default sort by name
+  $scope.sortColumn = "name";
   $scope.sortReverse = false;
 
   // ================= SORTING LOGIC =================
@@ -47,7 +40,6 @@ app.controller("UsersController", function ($scope, UserService) {
   };
 
   $scope.saveUser = function () {
-    // Duplicate Email Check (Only for NEW users)
     if (!$scope.isEdit) {
       const emailExists = $scope.users.some(
         (u) =>
@@ -57,7 +49,6 @@ app.controller("UsersController", function ($scope, UserService) {
       );
 
       if (emailExists) {
-        // Show custom modal instead of alert
         var duplicateModal = new bootstrap.Modal(
           document.getElementById("duplicateEmailModal"),
         );
@@ -65,7 +56,6 @@ app.controller("UsersController", function ($scope, UserService) {
         return;
       }
 
-      // Duplicate Phone Check (Only for NEW users)
       const phoneExists = $scope.users.some(
         (u) =>
           u.phone &&
@@ -74,7 +64,6 @@ app.controller("UsersController", function ($scope, UserService) {
       );
 
       if (phoneExists) {
-        // Show custom modal for duplicate phone
         var duplicatePhoneModal = new bootstrap.Modal(
           document.getElementById("duplicatePhoneModal"),
         );
@@ -91,7 +80,6 @@ app.controller("UsersController", function ($scope, UserService) {
           console.log("User created successfully:", response);
           $scope.loadUsers();
           $scope.resetForm();
-          // Close the modal using Bootstrap API
           var userModal = bootstrap.Modal.getInstance(
             document.getElementById("userModal"),
           );
@@ -116,7 +104,6 @@ app.controller("UsersController", function ($scope, UserService) {
         console.log("User updated successfully:", response);
         $scope.loadUsers();
         $scope.resetForm();
-        // Close the modal using Bootstrap API
         var userModal = bootstrap.Modal.getInstance(
           document.getElementById("userModal"),
         );
@@ -131,7 +118,6 @@ app.controller("UsersController", function ($scope, UserService) {
 
   $scope.deleteUser = function (id) {
     $scope.deleteId = id;
-    // Show the modal using Bootstrap's modal API
     var deleteModal = new bootstrap.Modal(
       document.getElementById("deleteModal"),
     );
@@ -145,7 +131,6 @@ app.controller("UsersController", function ($scope, UserService) {
           console.log("User deleted successfully:", response);
           $scope.loadUsers();
           $scope.deleteId = null;
-          // Hide the modal
           var deleteModal = bootstrap.Modal.getInstance(
             document.getElementById("deleteModal"),
           );
@@ -169,6 +154,5 @@ app.controller("UsersController", function ($scope, UserService) {
     $scope.resetForm();
   };
 
-  // INITIAL LOAD
   $scope.loadUsers();
 });

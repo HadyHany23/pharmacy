@@ -8,7 +8,6 @@ app.service("AuthService", function ($http, SB_CONFIG) {
   };
 
   this.login = function (un, pw) {
-    // Check if username and password match a row in the profiles table
     return $http.get(
       PROFILE_URL +
         "?username=eq." +

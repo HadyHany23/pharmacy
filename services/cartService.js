@@ -6,18 +6,18 @@ app.service("CartService", function () {
   };
 
   this.addToCart = function (product) {
-    // Check if item already exists in cart
+    
     var existingItem = cart.find((item) => item.id === product.id);
 
     if (existingItem) {
       existingItem.quantity += 1;
     } else {
-      // Add new item with quantity 1
+      
       cart.push({
         id: product.id,
         name: product.name,
         price: product.price,
-        stock: product.stock, // To check we don't oversell
+        stock: product.stock, 
         quantity: 1,
       });
     }

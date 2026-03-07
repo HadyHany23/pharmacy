@@ -20,7 +20,6 @@ app.controller(
       });
     };
 
-    // 1. Find Customer
     $scope.findCustomer = function () {
       if (!$scope.customer.phone) return;
 
@@ -34,7 +33,6 @@ app.controller(
             $scope.customer = res.data[0];
             $scope.customerFound = true;
 
-            // Flags for locking fields that already have data
             $scope.canEditName = !$scope.customer.name;
             $scope.canEditEmail = !$scope.customer.email;
             $scope.canEditAddress = !$scope.customer.address;
@@ -58,7 +56,6 @@ app.controller(
         });
     };
 
-    // 2. Process Order
     $scope.processOrder = function () {
       if ($scope.cart.length === 0) return;
       $scope.processing = true;
@@ -70,11 +67,9 @@ app.controller(
         address: $scope.customer.address || null,
       };
 
-      // --- CRITICAL FIX: The Step A Logic ---
       let resolveCustomer;
 
       if ($scope.customerFound && $scope.customer.id) {
-        // If we found them, always PATCH to save any new info (like address)
         resolveCustomer = $http.patch(
           SB_CONFIG.URL + "customers?id=eq." + $scope.customer.id,
           customerData,
@@ -86,7 +81,6 @@ app.controller(
           },
         );
       } else {
-        // If not found via search, try to create
         resolveCustomer = $http
           .post(SB_CONFIG.URL + "customers", customerData, {
             headers: {
@@ -95,8 +89,6 @@ app.controller(
             },
           })
           .catch((err) => {
-            // If 409 happens, it means they exist but we didn't have the ID.
-            // We fetch them, then PATCH the new data (address) onto them.
             if (err.status === 409) {
               return $http
                 .get(
@@ -123,11 +115,9 @@ app.controller(
 
       resolveCustomer
         .then(function (custRes) {
-          // custRes.data could be an array (from Prefer: representation)
           const customer = custRes.data[0] || custRes.data;
           const customerId = customer.id;
 
-          // STEP B: Create Order
           const orderData = {
             customer_id: customerId,
             total_price: parseFloat($scope.totalAmount),
@@ -143,7 +133,6 @@ app.controller(
         .then(function (orderRes) {
           const orderId = orderRes.data[0].id;
 
-          // STEP C: Save Items
           const itemsToSave = $scope.cart.map((item) => ({
             order_id: orderId,
             medicine_id: item.id,
@@ -158,7 +147,6 @@ app.controller(
           );
         })
         .then(function () {
-          // STEP D: Update Stock
           const stockUpdates = $scope.cart.map((item) => {
             return $http.patch(
               SB_CONFIG.URL + "medicines?id=eq." + item.id,

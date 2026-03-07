@@ -3,7 +3,6 @@ app.controller("AuthController", function ($scope, $location, AuthService) {
   $scope.regUser = {};
   $scope.roles = [];
 
-  // Reusable Toast Configuration
   const Toast = Swal.mixin({
     toast: true,
     position: "top-end",
@@ -12,7 +11,6 @@ app.controller("AuthController", function ($scope, $location, AuthService) {
     timerProgressBar: true,
   });
 
-  // Load roles for the registration dropdown
   AuthService.getRoles().then(function (res) {
     $scope.roles = res.data;
   });
@@ -29,7 +27,6 @@ app.controller("AuthController", function ($scope, $location, AuthService) {
         localStorage.setItem("userRole", user.roles.name);
         localStorage.setItem("userName", user.full_name);
 
-        // Success Toast
         Toast.fire({
           icon: "success",
           title: "Welcome back, " + user.full_name + "!",
@@ -37,7 +34,6 @@ app.controller("AuthController", function ($scope, $location, AuthService) {
 
         $location.path("/medicines");
       } else {
-        // Error Modal
         Swal.fire({
           icon: "error",
           title: "Login Failed",

@@ -1,14 +1,10 @@
 app.controller(
   "MedicineDetailController",
   function ($scope, $routeParams, MedicineService, $location) {
-    console.log("MedicineDetailController loaded");
-    console.log("Route params:", $routeParams);
-
     $scope.medicine = null;
     $scope.loading = true;
     $scope.deleteId = null;
 
-    // Medicine form variables
     $scope.currentMed = {};
     $scope.isEdit = false;
     $scope.categories = [];
@@ -16,26 +12,26 @@ app.controller(
     $scope.categoryError = "";
 
     $scope.loadMedicine = function () {
-      console.log("Loading medicine with ID:", $routeParams.id);
       $scope.loading = true;
       MedicineService.getMedicineById($routeParams.id)
         .then(function (response) {
-          console.log("Response from service:", response);
           if (response.data && response.data.length > 0) {
             $scope.medicine = response.data[0];
-            console.log("Medicine loaded:", $scope.medicine);
           } else {
-            console.log("No medicine found");
             $scope.medicine = null;
+            Swal.fire(
+              "Not Found",
+              "Medicine record could not be located.",
+              "warning",
+            );
           }
         })
         .catch(function (error) {
-          console.error("Error loading medicine details", error);
+          Swal.fire("Error", "Failed to load medicine details.", "error");
           $scope.medicine = null;
         })
         .finally(function () {
           $scope.loading = false;
-          console.log("Loading finished, medicine:", $scope.medicine);
         });
     };
 
@@ -52,7 +48,6 @@ app.controller(
       if ($scope.currentMed.expiry_date) {
         $scope.currentMed.expiry_date = new Date($scope.currentMed.expiry_date);
       }
-      // Show the modal using Bootstrap's modal API
       var medicineModal = new bootstrap.Modal(
         document.getElementById("medicineModal"),
       );
@@ -60,54 +55,69 @@ app.controller(
     };
 
     $scope.deleteMedicine = function () {
-      $scope.deleteId = $scope.medicine.id;
-      // Show the modal using Bootstrap's modal API
-      var deleteModal = new bootstrap.Modal(
-        document.getElementById("deleteModal"),
-      );
-      deleteModal.show();
+      Swal.fire({
+        title: "Are you sure?",
+        text: "This will permanently delete " + $scope.medicine.name,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $scope.confirmDelete($scope.medicine.id);
+        }
+      });
     };
 
-    $scope.confirmDelete = function () {
-      if ($scope.deleteId) {
-        MedicineService.deleteMedicine($scope.deleteId)
-          .then(function () {
-            $location.path("/medicines");
-            $scope.deleteId = null;
-            // Hide the modal
-            var deleteModal = bootstrap.Modal.getInstance(
-              document.getElementById("deleteModal"),
-            );
-            if (deleteModal) {
-              deleteModal.hide();
-            }
-          })
-          .catch(function (error) {
-            console.error("Error deleting medicine", error);
-            alert("Error deleting medicine. Please try again.");
-          });
-      }
+    $scope.confirmDelete = function (id) {
+      MedicineService.deleteMedicine(id)
+        .then(function () {
+          Swal.fire("Deleted!", "Medicine has been removed.", "success");
+          $location.path("/medicines");
+        })
+        .catch(function (error) {
+          Swal.fire(
+            "Error",
+            "Could not delete the medicine. Please try again.",
+            "error",
+          );
+        });
     };
 
     $scope.restockMedicine = function () {
-      var addStock = prompt(
-        "How many units would you like to add to the stock?",
-        "10",
-      );
-      if (addStock && !isNaN(addStock) && parseInt(addStock) > 0) {
-        var updatedMedicine = angular.copy($scope.medicine);
-        updatedMedicine.stock =
-          parseInt(updatedMedicine.stock) + parseInt(addStock);
+      Swal.fire({
+        title: "Restock Medicine",
+        text: "How many units would you like to add?",
+        input: "number",
+        inputAttributes: {
+          min: 1,
+          step: 1,
+        },
+        inputValue: 10,
+        showCancelButton: true,
+        confirmButtonText: "Add Stock",
+        showLoaderOnConfirm: true,
+      }).then((result) => {
+        if (result.isConfirmed && result.value > 0) {
+          var addStock = parseInt(result.value);
+          var updatedMedicine = angular.copy($scope.medicine);
+          updatedMedicine.stock = parseInt(updatedMedicine.stock) + addStock;
 
-        MedicineService.updateMedicine($scope.medicine.id, updatedMedicine)
-          .then(function () {
-            $scope.loadMedicine();
-          })
-          .catch(function (error) {
-            console.error("Error updating stock", error);
-            alert("Error updating stock. Please try again.");
-          });
-      }
+          MedicineService.updateMedicine($scope.medicine.id, updatedMedicine)
+            .then(function () {
+              Swal.fire(
+                "Success",
+                addStock + " units added to stock.",
+                "success",
+              );
+              $scope.loadMedicine();
+            })
+            .catch(function (error) {
+              Swal.fire("Error", "Failed to update stock levels.", "error");
+            });
+        }
+      });
     };
 
     $scope.printLabel = function () {
@@ -143,8 +153,6 @@ app.controller(
     };
 
     $scope.loadCategories = function () {
-      // Import CategoryService and use it here
-      // For now, we'll use a basic approach
       $scope.categories = [
         { name: "Antibiotics" },
         { name: "Pain Killers" },
@@ -157,7 +165,6 @@ app.controller(
     $scope.addNewCategory = function () {
       $scope.newCategoryName = "";
       $scope.categoryError = "";
-      // Show the modal using Bootstrap's modal API
       var categoryModal = new bootstrap.Modal(
         document.getElementById("categoryModal"),
       );
@@ -182,14 +189,42 @@ app.controller(
         $scope.currentMed.category = newCat;
         $scope.newCategoryName = "";
         $scope.categoryError = "";
-        // Hide the modal
         var categoryModal = bootstrap.Modal.getInstance(
           document.getElementById("categoryModal"),
         );
         if (categoryModal) {
           categoryModal.hide();
         }
+        Swal.fire(
+          "Success",
+          "New category '" + newCat + "' added locally.",
+          "success",
+        );
       }
+    };
+
+    $scope.removeCategory = function () {
+      const selectedName = $scope.currentMed.category;
+
+      if (!selectedName) return;
+
+      Swal.fire({
+        title: "Delete Category?",
+        text: `Are you sure you want to remove "${selectedName}"? This will only remove it from the list.`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $scope.categories = $scope.categories.filter(
+            (c) => c.name !== selectedName,
+          );
+          $scope.currentMed.category = "";
+          $scope.$apply();
+          Swal.fire("Deleted!", "Category removed from the list.", "success");
+        }
+      });
     };
 
     $scope.saveMedicine = function () {
@@ -201,9 +236,13 @@ app.controller(
     $scope.updateMedicine = function () {
       MedicineService.updateMedicine($scope.currentMed.id, $scope.currentMed)
         .then(function () {
+          Swal.fire(
+            "Updated",
+            "Medicine details saved successfully.",
+            "success",
+          );
           $scope.loadMedicine();
           $scope.resetForm();
-          // Hide the modal
           var medicineModal = bootstrap.Modal.getInstance(
             document.getElementById("medicineModal"),
           );
@@ -212,7 +251,11 @@ app.controller(
           }
         })
         .catch(function (error) {
-          console.error("Error updating medicine", error);
+          Swal.fire(
+            "Update Failed",
+            "Error saving changes to the database.",
+            "error",
+          );
         });
     };
 
@@ -221,7 +264,6 @@ app.controller(
       $scope.currentMed = {};
     };
 
-    // Initialize categories
     $scope.loadCategories();
     $scope.loadMedicine();
   },

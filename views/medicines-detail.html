@@ -1,12 +1,15 @@
 <div class="container fade-in">
-
   <div ng-if="medicine">
     <div class="row mb-4">
       <div class="col-12">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#!/medicines">Inventory</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Medicine Details</li>
+            <li class="breadcrumb-item">
+              <a href="#!/medicines">Inventory</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+              Medicine Details
+            </li>
           </ol>
         </nav>
       </div>
@@ -19,13 +22,21 @@
             <div class="d-flex justify-content-between align-items-start mb-4">
               <div>
                 <h2 class="fw-bold text-dark mb-2">{{ medicine.name }}</h2>
-                <span class="badge bg-light text-dark border fs-6">{{ medicine.category }}</span>
+                <span class="badge bg-light text-dark border fs-6"
+                  >{{ medicine.category }}</span
+                >
               </div>
               <div class="btn-group gap-2">
-                <button class="btn btn-outline-warning btn-sm" ng-click="editMedicine()">
+                <button
+                  class="btn btn-outline-warning btn-sm"
+                  ng-click="editMedicine()"
+                >
                   <i class="bi bi-pencil-square me-1"></i> Edit
                 </button>
-                <button class="btn btn-outline-danger btn-sm" ng-click="deleteMedicine()">
+                <button
+                  class="btn btn-outline-danger btn-sm"
+                  ng-click="deleteMedicine()"
+                >
                   <i class="bi bi-trash me-1"></i> Delete
                 </button>
               </div>
@@ -36,7 +47,9 @@
                 <div class="d-flex align-items-center mb-3">
                   <div>
                     <small class="text-muted d-block">Price</small>
-                    <h4 class="fw-bold text-primary mb-0">{{ medicine.price | currency }}</h4>
+                    <h4 class="fw-bold text-primary mb-0">
+                      {{ medicine.price | currency }}
+                    </h4>
                   </div>
                 </div>
               </div>
@@ -46,8 +59,10 @@
                   <div>
                     <small class="text-muted d-block">Stock Quantity</small>
                     <h4 class="fw-bold mb-0">
-                      <span class="badge px-3 py-2"
-                        ng-class="{'bg-danger': medicine.stock < 10, 'bg-warning text-dark': medicine.stock < 20, 'bg-success': medicine.stock >= 20}">
+                      <span
+                        class="badge px-3 py-2"
+                        ng-class="{'bg-danger': medicine.stock < 10, 'bg-warning text-dark': medicine.stock < 20, 'bg-success': medicine.stock >= 20}"
+                      >
                         {{ medicine.stock }} units
                       </span>
                     </h4>
@@ -59,10 +74,16 @@
                 <div class="d-flex align-items-center mb-3">
                   <div>
                     <small class="text-muted d-block">Expiry Date</small>
-                    <h4 class="fw-bold mb-0" ng-class="isExpired(medicine.expiry_date) ? 'text-danger' : 'text-dark'">
+                    <h4
+                      class="fw-bold mb-0"
+                      ng-class="isExpired(medicine.expiry_date) ? 'text-danger' : 'text-dark'"
+                    >
                       {{ medicine.expiry_date | date:'mediumDate' }}
                     </h4>
-                    <small ng-if="isExpired(medicine.expiry_date)" class="text-danger">
+                    <small
+                      ng-if="isExpired(medicine.expiry_date)"
+                      class="text-danger"
+                    >
                       Expired
                     </small>
                   </div>
@@ -74,9 +95,17 @@
                   <div>
                     <small class="text-muted d-block">Stock Status</small>
                     <h4 class="fw-bold mb-0">
-                      <span ng-if="medicine.stock < 10" class="text-danger">Critical Stock</span>
-                      <span ng-if="medicine.stock >= 10 && medicine.stock < 20" class="text-warning">Low Stock</span>
-                      <span ng-if="medicine.stock >= 20" class="text-success">In Stock</span>
+                      <span ng-if="medicine.stock < 10" class="text-danger"
+                        >Critical Stock</span
+                      >
+                      <span
+                        ng-if="medicine.stock >= 10 && medicine.stock < 20"
+                        class="text-warning"
+                        >Low Stock</span
+                      >
+                      <span ng-if="medicine.stock >= 20" class="text-success"
+                        >In Stock</span
+                      >
                     </h4>
                   </div>
                 </div>
@@ -93,9 +122,14 @@
       <div class="col-md-6">
         <div class="card border-0 shadow-sm">
           <div class="card-body text-center p-5">
-            <i class="bi bi-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+            <i
+              class="bi bi-exclamation-triangle text-warning"
+              style="font-size: 4rem"
+            ></i>
             <h4 class="mt-3">Medicine Not Found</h4>
-            <p class="text-muted mb-4">The medicine you're looking for doesn't exist or has been removed.</p>
+            <p class="text-muted mb-4">
+              The medicine you're looking for doesn't exist or has been removed.
+            </p>
             <a href="#!/medicines" class="btn btn-primary">
               <i class="bi bi-arrow-left me-2"></i>Back to Inventory
             </a>
@@ -120,70 +154,142 @@
     </div>
   </div>
 
-  <div class="modal fade" id="medicineModal" tabindex="-1" aria-hidden="true" ng-if="getUserRole() === 'admin'">
+  <div
+    class="modal fade"
+    id="medicineModal"
+    tabindex="-1"
+    aria-hidden="true"
+    ng-if="getUserRole() === 'admin'"
+  >
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header bg-dark text-white">
           <h5 class="modal-title">
             {{ isEdit ? 'Edit Medicine' : 'Add New Medicine' }}
           </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
-        <form name="medForm" ng-submit="medForm.$valid && saveMedicine()" novalidate>
+        <form
+          name="medForm"
+          ng-submit="medForm.$valid && saveMedicine()"
+          novalidate
+        >
           <div class="modal-body">
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label fw-bold">Medicine Name</label>
-                <input type="text" class="form-control" ng-model="currentMed.name" required />
+                <input
+                  type="text"
+                  class="form-control"
+                  ng-model="currentMed.name"
+                  required
+                />
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-bold">Category</label>
                 <div class="input-group">
-                  <select class="form-select" ng-model="currentMed.category" required>
+                  <select
+                    class="form-select"
+                    ng-model="currentMed.category"
+                    required
+                  >
                     <option value="">Select Category</option>
                     <option ng-repeat="cat in categories" value="{{cat.name}}">
                       {{cat.name}}
                     </option>
                   </select>
-                  <button class="btn btn-outline-secondary" type="button" ng-click="addNewCategory()">
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    ng-click="addNewCategory()"
+                  >
                     +
                   </button>
+
+                  <button
+                    class="btn btn-outline-danger"
+                    type="button"
+                    title="Delete Selected Category"
+                    ng-click="removeCategory()"
+                    ng-disabled="!currentMed.category"
+                  >
+                    delete category
+                  </button>
+
+                  <small class="text-muted" ng-if="currentMed.category">
+                    Select a category above to delete it from the system.
+                  </small>
                 </div>
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-bold">Price</label>
-                <input type="number" step="0.01" min="0.01" class="form-control" ng-model="currentMed.price" required />
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  class="form-control"
+                  ng-model="currentMed.price"
+                  required
+                />
                 <small ng-show="medForm.price.$error.min" class="text-danger">
                   Price must be greater than 0
                 </small>
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-bold">Stock</label>
-                <input type="number" min="1" class="form-control" ng-model="currentMed.stock" required />
+                <input
+                  type="number"
+                  min="1"
+                  class="form-control"
+                  ng-model="currentMed.stock"
+                  required
+                />
                 <small ng-show="medForm.stock.$error.min" class="text-danger">
                   Stock must be at least 1
                 </small>
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-bold">Expiry Date</label>
-                <input type="date" class="form-control" ng-model="currentMed.expiry_date" required />
+                <input
+                  type="date"
+                  class="form-control"
+                  ng-model="currentMed.expiry_date"
+                  required
+                />
               </div>
             </div>
           </div>
           <div class="modal-footer">
             <div class="w-100">
-              <div ng-if="medForm.$invalid" class="alert alert-warning py-2 mb-2">
+              <div
+                ng-if="medForm.$invalid"
+                class="alert alert-warning py-2 mb-2"
+              >
                 <small class="mb-0">
                   <i class="bi bi-exclamation-triangle me-1"></i>
-                  Please fill all required fields correctly to enable the Save button.
+                  Please fill all required fields correctly to enable the Save
+                  button.
                 </small>
               </div>
               <div class="d-flex justify-content-between">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
                   Cancel
                 </button>
-                <button type="submit" class="btn btn-primary px-4" data-bs-dismiss="modal"
-                  ng-disabled="medForm.$invalid">
+                <button
+                  type="submit"
+                  class="btn btn-primary px-4"
+                  data-bs-dismiss="modal"
+                  ng-disabled="medForm.$invalid"
+                >
                   {{ isEdit ? 'Update Changes' : 'Save Medicine' }}
                 </button>
               </div>
@@ -201,21 +307,45 @@
           <h5 class="modal-title">
             <i class="bi bi-plus-circle me-2"></i>Add New Category
           </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
         <div class="modal-body">
           <div class="mb-3">
-            <label for="newCategoryName" class="form-label fw-bold">Enter new category name:</label>
-            <input type="text" class="form-control" id="newCategoryName" ng-model="newCategoryName"
-              placeholder="e.g., Antibiotics, Pain Killers">
+            <label for="newCategoryName" class="form-label fw-bold"
+              >Enter new category name:</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="newCategoryName"
+              ng-model="newCategoryName"
+              placeholder="e.g., Antibiotics, Pain Killers"
+            />
           </div>
           <div ng-if="categoryError" class="alert alert-danger" role="alert">
             {{ categoryError }}
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" ng-click="confirmAddCategory()">Add Category</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            ng-click="confirmAddCategory()"
+          >
+            Add Category
+          </button>
         </div>
       </div>
     </div>
@@ -228,14 +358,31 @@
           <h5 class="modal-title">
             <i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete
           </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
         <div class="modal-body">
           <p class="mb-0">Are you sure you want to delete this medicine?</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-danger" ng-click="confirmDelete()">OK</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            ng-click="confirmDelete()"
+          >
+            OK
+          </button>
         </div>
       </div>
     </div>
