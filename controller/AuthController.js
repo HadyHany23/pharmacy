@@ -3,6 +3,15 @@ app.controller("AuthController", function ($scope, $location, AuthService) {
   $scope.regUser = {};
   $scope.roles = [];
 
+  // Reusable Toast Configuration
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+  });
+
   // Load roles for the registration dropdown
   AuthService.getRoles().then(function (res) {
     $scope.roles = res.data;
@@ -20,9 +29,21 @@ app.controller("AuthController", function ($scope, $location, AuthService) {
         localStorage.setItem("userRole", user.roles.name);
         localStorage.setItem("userName", user.full_name);
 
+        // Success Toast
+        Toast.fire({
+          icon: "success",
+          title: "Welcome back, " + user.full_name + "!",
+        });
+
         $location.path("/medicines");
       } else {
-        alert("Wrong username or password!");
+        // Error Modal
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: "Wrong username or password!",
+          confirmButtonColor: "#3085d6",
+        });
       }
     });
   };
@@ -30,14 +51,31 @@ app.controller("AuthController", function ($scope, $location, AuthService) {
   $scope.handleRegister = function () {
     AuthService.register($scope.regUser)
       .then(function () {
-        alert("Success! Now you can login.");
-        $location.path("/login");
+        Swal.fire({
+          icon: "success",
+          title: "Account Created!",
+          text: "Registration successful. You can now log in.",
+          confirmButtonText: "Go to Login",
+          confirmButtonColor: "#28a745",
+        }).then(() => {
+          $location.path("/login");
+        });
       })
       .catch(function (err) {
         if (err.status === 409) {
-          alert("Registration Error: This username is already taken!");
+          Swal.fire({
+            icon: "warning",
+            title: "Username Taken",
+            text: "This username is already registered. Please choose another.",
+            confirmButtonColor: "#f8bb86",
+          });
         } else {
-          alert("An error occurred during registration.");
+          Swal.fire({
+            icon: "error",
+            title: "Registration Error",
+            text: "An unexpected error occurred. Please try again later.",
+            footer: "Error Code: " + err.status,
+          });
         }
       });
   };
