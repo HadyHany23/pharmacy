@@ -171,9 +171,10 @@
                     class="btn btn-outline-secondary"
                     type="button"
                     title="Add New Role"
-                    ng-click="addNewRole()"
+                    data-bs-toggle="modal"
+                    data-bs-target="#roleModal"
                   >
-                    <i class="bi bi-plus-lg"></i>
+                    Add Role
                   </button>
 
                   <button
@@ -183,7 +184,7 @@
                     ng-click="removeRole()"
                     ng-disabled="!currentProfile.role_id"
                   >
-                    <i class="bi bi-trash"></i>
+                    Delete Role
                   </button>
                 </div>
                 <small class="text-muted" ng-if="currentProfile.role_id">
@@ -227,6 +228,49 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Role Input Modal -->
+<div class="modal fade" id="roleModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-person-badge me-2"></i>Add New Role
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-bold"> Enter new role name: </label>
+
+          <input
+            type="text"
+            class="form-control"
+            ng-model="newRoleName"
+            placeholder="e.g. Pharmacist"
+          />
+        </div>
+
+        <div ng-if="roleError" class="alert alert-danger">{{ roleError }}</div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+
+        <button class="btn btn-primary" ng-click="confirmAddRole()">
+          Add Role
+        </button>
       </div>
     </div>
   </div>

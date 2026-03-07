@@ -48,12 +48,34 @@ app.controller(
       var cartItem = CartService.getCart().find((i) => i.id === medicine.id);
       var currentInCart = cartItem ? cartItem.quantity : 0;
 
+      // 1. Check Stock
       if (currentInCart + 1 > medicine.stock) {
-        alert("Not enough stock available! Remaining: " + medicine.stock);
+        Swal.fire({
+          title: "Out of Stock",
+          text:
+            "You cannot add more than " +
+            medicine.stock +
+            " units of this item.",
+          icon: "warning",
+          confirmButtonColor: "#3085d6",
+        });
         return;
       }
 
+      // 2. Add to Cart
       CartService.addToCart(medicine);
+
+      // 3. Success Toast (Top-Right corner)
+      Swal.fire({
+        title: "Added Successfully!",
+        text: medicine.name + " added to your cart.",
+        icon: "success",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+      });
     };
 
     // ================= CATEGORY LOGIC =================
