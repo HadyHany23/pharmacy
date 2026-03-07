@@ -6,6 +6,14 @@ app.controller(
 
     $scope.medicine = null;
     $scope.loading = true;
+    $scope.deleteId = null;
+
+    // Medicine form variables
+    $scope.currentMed = {};
+    $scope.isEdit = false;
+    $scope.categories = [];
+    $scope.newCategoryName = "";
+    $scope.categoryError = "";
 
     $scope.loadMedicine = function () {
       console.log("Loading medicine with ID:", $routeParams.id);
@@ -39,18 +47,40 @@ app.controller(
     };
 
     $scope.editMedicine = function () {
-      $location.path("/medicines");
-      setTimeout(function () {
-        angular.element("#medicineModal").modal("show");
-        angular.element("#medicineModal").scope().editMedicine($scope.medicine);
-      }, 100);
+      $scope.isEdit = true;
+      $scope.currentMed = angular.copy($scope.medicine);
+      if ($scope.currentMed.expiry_date) {
+        $scope.currentMed.expiry_date = new Date($scope.currentMed.expiry_date);
+      }
+      // Show the modal using Bootstrap's modal API
+      var medicineModal = new bootstrap.Modal(
+        document.getElementById("medicineModal"),
+      );
+      medicineModal.show();
     };
 
     $scope.deleteMedicine = function () {
-      if (confirm("Are you sure you want to delete this medicine?")) {
-        MedicineService.deleteMedicine($scope.medicine.id)
+      $scope.deleteId = $scope.medicine.id;
+      // Show the modal using Bootstrap's modal API
+      var deleteModal = new bootstrap.Modal(
+        document.getElementById("deleteModal"),
+      );
+      deleteModal.show();
+    };
+
+    $scope.confirmDelete = function () {
+      if ($scope.deleteId) {
+        MedicineService.deleteMedicine($scope.deleteId)
           .then(function () {
             $location.path("/medicines");
+            $scope.deleteId = null;
+            // Hide the modal
+            var deleteModal = bootstrap.Modal.getInstance(
+              document.getElementById("deleteModal"),
+            );
+            if (deleteModal) {
+              deleteModal.hide();
+            }
           })
           .catch(function (error) {
             console.error("Error deleting medicine", error);
@@ -112,6 +142,89 @@ app.controller(
       printWindow.document.close();
     };
 
+    // ================= MEDICINE FORM FUNCTIONS =================
+
+    $scope.loadCategories = function () {
+      // Import CategoryService and use it here
+      // For now, we'll use a basic approach
+      $scope.categories = [
+        { name: "Antibiotics" },
+        { name: "Pain Killers" },
+        { name: "Vitamins" },
+        { name: "Cold & Flu" },
+        { name: "Allergy" },
+      ];
+    };
+
+    $scope.addNewCategory = function () {
+      $scope.newCategoryName = "";
+      $scope.categoryError = "";
+      // Show the modal using Bootstrap's modal API
+      var categoryModal = new bootstrap.Modal(
+        document.getElementById("categoryModal"),
+      );
+      categoryModal.show();
+    };
+
+    $scope.confirmAddCategory = function () {
+      if (!$scope.newCategoryName || $scope.newCategoryName.trim() === "") {
+        $scope.categoryError = "Please enter a category name";
+        return;
+      }
+
+      var newCat = $scope.newCategoryName.trim();
+      var exists = $scope.categories.some(
+        (c) => c.name.toLowerCase() === newCat.toLowerCase(),
+      );
+
+      if (exists) {
+        $scope.categoryError = "Category already exists!";
+      } else {
+        $scope.categories.push({ name: newCat });
+        $scope.currentMed.category = newCat;
+        $scope.newCategoryName = "";
+        $scope.categoryError = "";
+        // Hide the modal
+        var categoryModal = bootstrap.Modal.getInstance(
+          document.getElementById("categoryModal"),
+        );
+        if (categoryModal) {
+          categoryModal.hide();
+        }
+      }
+    };
+
+    $scope.saveMedicine = function () {
+      if ($scope.isEdit) {
+        $scope.updateMedicine();
+      }
+    };
+
+    $scope.updateMedicine = function () {
+      MedicineService.updateMedicine($scope.currentMed.id, $scope.currentMed)
+        .then(function () {
+          $scope.loadMedicine();
+          $scope.resetForm();
+          // Hide the modal
+          var medicineModal = bootstrap.Modal.getInstance(
+            document.getElementById("medicineModal"),
+          );
+          if (medicineModal) {
+            medicineModal.hide();
+          }
+        })
+        .catch(function (error) {
+          console.error("Error updating medicine", error);
+        });
+    };
+
+    $scope.resetForm = function () {
+      $scope.isEdit = false;
+      $scope.currentMed = {};
+    };
+
+    // Initialize categories
+    $scope.loadCategories();
     $scope.loadMedicine();
   },
 );

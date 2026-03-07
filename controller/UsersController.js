@@ -8,6 +8,9 @@ app.controller("UsersController", function ($scope, UserService) {
   // Search & Filter state
   $scope.searchQuery = "";
 
+  // Delete confirmation state
+  $scope.deleteId = null;
+
   // ================= USER LOGIC =================
 
   $scope.loadUsers = function () {
@@ -27,12 +30,30 @@ app.controller("UsersController", function ($scope, UserService) {
   $scope.saveUser = function () {
     // Duplicate Email Check (Only for NEW users)
     if (!$scope.isEdit) {
-      const exists = $scope.users.some(
+      const emailExists = $scope.users.some(
         (u) => u.email.toLowerCase() === $scope.currentUser.email.toLowerCase(),
       );
 
-      if (exists) {
-        alert("This email is already in the system. Use 'Edit' instead.");
+      if (emailExists) {
+        // Show custom modal instead of alert
+        var duplicateModal = new bootstrap.Modal(
+          document.getElementById("duplicateEmailModal"),
+        );
+        duplicateModal.show();
+        return;
+      }
+
+      // Duplicate Phone Check (Only for NEW users)
+      const phoneExists = $scope.users.some(
+        (u) => u.phone === $scope.currentUser.phone,
+      );
+
+      if (phoneExists) {
+        // Show custom modal for duplicate phone
+        var duplicatePhoneModal = new bootstrap.Modal(
+          document.getElementById("duplicatePhoneModal"),
+        );
+        duplicatePhoneModal.show();
         return;
       }
     }
@@ -45,8 +66,13 @@ app.controller("UsersController", function ($scope, UserService) {
           console.log("User created successfully:", response);
           $scope.loadUsers();
           $scope.resetForm();
-          // Close the modal
-          angular.element("#userModal").modal("hide");
+          // Close the modal using Bootstrap API
+          var userModal = bootstrap.Modal.getInstance(
+            document.getElementById("userModal"),
+          );
+          if (userModal) {
+            userModal.hide();
+          }
         })
         .catch(function (error) {
           console.error("Error creating user", error);
@@ -65,8 +91,13 @@ app.controller("UsersController", function ($scope, UserService) {
         console.log("User updated successfully:", response);
         $scope.loadUsers();
         $scope.resetForm();
-        // Close the modal
-        angular.element("#userModal").modal("hide");
+        // Close the modal using Bootstrap API
+        var userModal = bootstrap.Modal.getInstance(
+          document.getElementById("userModal"),
+        );
+        if (userModal) {
+          userModal.hide();
+        }
       })
       .catch(function (error) {
         console.error("Error updating user", error);
@@ -74,16 +105,34 @@ app.controller("UsersController", function ($scope, UserService) {
   };
 
   $scope.deleteUser = function (id) {
-    if (!confirm("Are you sure you want to delete this user?")) return;
-    UserService.deleteUser(id)
-      .then(function (response) {
-        console.log("User deleted successfully:", response);
-        $scope.loadUsers();
-      })
-      .catch(function (error) {
-        console.error("Error deleting user", error);
-        alert("Error deleting user. Please try again.");
-      });
+    $scope.deleteId = id;
+    // Show the modal using Bootstrap's modal API
+    var deleteModal = new bootstrap.Modal(
+      document.getElementById("deleteModal"),
+    );
+    deleteModal.show();
+  };
+
+  $scope.confirmDelete = function () {
+    if ($scope.deleteId) {
+      UserService.deleteUser($scope.deleteId)
+        .then(function (response) {
+          console.log("User deleted successfully:", response);
+          $scope.loadUsers();
+          $scope.deleteId = null;
+          // Hide the modal
+          var deleteModal = bootstrap.Modal.getInstance(
+            document.getElementById("deleteModal"),
+          );
+          if (deleteModal) {
+            deleteModal.hide();
+          }
+        })
+        .catch(function (error) {
+          console.error("Error deleting user", error);
+          alert("Error deleting user. Please try again.");
+        });
+    }
   };
 
   // ================= UTILS =================
