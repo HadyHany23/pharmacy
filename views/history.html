@@ -106,6 +106,11 @@
       </tbody>
     </table>
 
+    <div ng-if="loading" class="text-center p-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p>Loading History...</p>
+    </div>
+
     <div ng-if="filteredList.length === 0 && !loading" class="text-center p-5">
       <h4 class="text-muted">No records found matching your filters.</h4>
     </div>
@@ -123,31 +128,35 @@
         class="d-flex align-items-center"
         style="display: flex; align-items: center"
       >
-        <div class="d-flex align-items-center gap-2">
-          <label class="text-muted small mb-0">Show:</label>
+        <div class="d-flex align-items-center" style="margin-right: 15px">
+          <label class="text-muted small mb-0" style="margin-right: 10px"
+            >Show:</label
+          >
           <select
-            class="form-select form-select-sm"
-            style="width: auto"
+            class="form-control input-sm"
+            style="width: 70px; display: inline-block"
             ng-model="pageSize"
             ng-options="size for size in [5, 10, 20, 50]"
           ></select>
         </div>
-        <div class="text-muted small border-left ps-3">
+        <div class="text-muted small">
           Page <strong>{{currentPage + 1}}</strong> of {{numberOfPages()}}
-          <span class="ml-2">({{filteredList.length}} total items)</span>
+          <span style="margin-left: 10px"
+            >({{filteredList.length}} total items)</span
+          >
         </div>
       </div>
 
       <div class="btn-group">
         <button
-          class="btn btn-sm btn-outline-primary"
+          class="btn btn-sm btn-default"
           ng-disabled="currentPage == 0"
           ng-click="currentPage = currentPage - 1"
         >
           <i class="glyphicon glyphicon-chevron-left"></i> Previous
         </button>
         <button
-          class="btn btn-sm btn-outline-primary"
+          class="btn btn-sm btn-default"
           ng-disabled="currentPage >= numberOfPages() - 1"
           ng-click="currentPage = currentPage + 1"
         >
