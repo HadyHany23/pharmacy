@@ -123,6 +123,55 @@ app.controller(
       categoryModal.show();
     };
 
+    $scope.removeCategory = function () {
+      // 1. Find the category object based on the name currently in the dropdown
+      const selectedName = $scope.currentMed.category;
+      const categoryObj = $scope.categories.find(
+        (c) => c.name === selectedName,
+      );
+
+      if (!categoryObj) {
+        Swal.fire(
+          "Error",
+          "Please select a category from the list to delete it.",
+          "error",
+        );
+        return;
+      }
+
+      // 2. Confirmation Alert
+      Swal.fire({
+        title: "Delete Category?",
+        text: `Are you sure you want to remove "${categoryObj.name}"? This will not delete medicines, but the category will disappear from filters.`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // 3. Call the updated Service
+          CategoryService.deleteCategory(categoryObj.id)
+            .then(function () {
+              Swal.fire("Deleted!", "Category has been removed.", "success");
+
+              // 4. Refresh the UI
+              $scope.currentMed.category = ""; // Clear selection
+              $scope.loadCategories(); // Reload dropdown list
+            })
+            .catch(function (err) {
+              console.error("Delete failed", err);
+              // If you see 401 here, check your Supabase RLS policies for DELETE
+              Swal.fire(
+                "Error",
+                "Delete failed. Check your permissions (401 Unauthorized).",
+                "error",
+              );
+            });
+        }
+      });
+    };
+
     $scope.confirmAddCategory = function () {
       if (!$scope.newCategoryName || $scope.newCategoryName.trim() === "") {
         $scope.categoryError = "Please enter a category name";

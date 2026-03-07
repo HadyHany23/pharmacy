@@ -11,6 +11,27 @@ app.controller("UsersController", function ($scope, UserService) {
   // Delete confirmation state
   $scope.deleteId = null;
 
+  // Add these with your other variables at the top
+  $scope.sortColumn = "name"; // Default sort by name
+  $scope.sortReverse = false;
+
+  // ================= SORTING LOGIC =================
+  $scope.sortData = function (column) {
+    if ($scope.sortColumn === column) {
+      $scope.sortReverse = !$scope.sortReverse;
+    } else {
+      $scope.sortColumn = column;
+      $scope.sortReverse = false;
+    }
+  };
+
+  $scope.getSortClass = function (column) {
+    if ($scope.sortColumn === column) {
+      return $scope.sortReverse ? "bi-arrow-down" : "bi-arrow-up";
+    }
+    return "bi-arrow-down-up";
+  };
+
   // ================= USER LOGIC =================
 
   $scope.loadUsers = function () {
