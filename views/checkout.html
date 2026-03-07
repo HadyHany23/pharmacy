@@ -1,72 +1,145 @@
-<div class="container">
-  <h2 class="text-center">Final Checkout</h2>
+<div class="container fade-in">
+  <h2 class="text-center fw-bold">
+    <i class="bi bi-cart-check me-2"></i>Final Checkout
+  </h2>
   <hr />
 
-  <div class="row">
-    <div class="col-md-6">
-      <div class="panel panel-primary">
-        <div class="panel-heading">Customer Details</div>
-        <div class="panel-body">
-          <div class="form-group">
-            <label>Phone Number (Search)</label>
-            <div class="input-group">
+  <form name="checkoutForm" novalidate>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card shadow-sm border-primary">
+          <div class="card-header bg-primary text-white fw-bold">
+            Customer Details
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Phone Number (11 digits)</label>
+              <div class="input-group">
+                <input
+                  minlength="11"
+                  maxlength="11"
+                  type="text"
+                  name="phone"
+                  class="form-control"
+                  ng-model="customer.phone"
+                  placeholder="e.g. 012*********"
+                  ng-pattern="/^[0-9]{11}$/"
+                  required
+                />
+                <button
+                  class="btn btn-info"
+                  type="button"
+                  ng-click="findCustomer()"
+                  ng-disabled="checkoutForm.phone.$invalid"
+                >
+                  <i class="bi bi-search"></i> Search
+                </button>
+              </div>
+              <div
+                class="text-danger small"
+                ng-show="checkoutForm.phone.$dirty && checkoutForm.phone.$invalid"
+              >
+                <span ng-show="checkoutForm.phone.$error.required"
+                  >Phone is required.</span
+                >
+                <span ng-show="checkoutForm.phone.$error.pattern"
+                  >Must be exactly 11 digits.</span
+                >
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Customer Name</label>
               <input
                 type="text"
+                name="name"
                 class="form-control"
-                ng-model="customer.phone"
-                placeholder="Enter phone..."
+                ng-model="customer.name"
+                ng-disabled="customerFound && !canEditName"
+                ng-minlength="3"
+                placeholder="Full Name"
+                required
               />
-              <span class="input-group-btn">
-                <button class="btn btn-info" ng-click="findCustomer()">
-                  Search
-                </button>
-              </span>
+              <div
+                class="text-danger small"
+                ng-show="checkoutForm.name.$dirty && checkoutForm.name.$invalid"
+              >
+                <span ng-show="checkoutForm.name.$error.required"
+                  >Name is required.</span
+                >
+                <span ng-show="checkoutForm.name.$error.minlength"
+                  >Name must be at least 3 characters.</span
+                >
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Email Address</label>
+              <input
+                type="email"
+                name="email"
+                class="form-control"
+                ng-model="customer.email"
+                ng-disabled="customerFound && !canEditEmail"
+                placeholder="example@mail.com"
+              />
+              <div
+                class="text-danger small"
+                ng-show="checkoutForm.email.$invalid"
+              >
+                Enter a valid email address.
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Physical Address</label>
+              <textarea
+                class="form-control"
+                ng-model="customer.address"
+                ng-disabled="customerFound && !canEditAddress"
+                placeholder="Home or work address..."
+              ></textarea>
+            </div>
+
+            <div class="alert alert-info py-2" ng-if="customerFound">
+              <small
+                ><i class="bi bi-info-circle me-1"></i> Existing customer.
+                Missing fields can be updated.</small
+              >
             </div>
           </div>
-          <div class="form-group">
-            <label>Customer Name</label>
-            <input
-              type="text"
-              class="form-control"
-              ng-model="customer.name"
-              ng-disabled="customerFound"
-            />
-          </div>
-          <div class="form-group">
-            <label>Notes</label>
-            <textarea class="form-control" ng-model="orderNotes"></textarea>
-          </div>
         </div>
       </div>
-    </div>
 
-    <div class="col-md-6">
-      <div class="panel panel-default">
-        <div class="panel-heading">Order Summary</div>
-        <table class="table">
-          <tr ng-repeat="item in cart">
-            <td>{{item.name}} x {{item.quantity}}</td>
-            <td class="text-right">
-              {{ (item.price * item.quantity) | currency }}
-            </td>
-          </tr>
-          <tr class="active">
-            <td><strong>Total Amount</strong></td>
-            <td class="text-right">
-              <strong>{{ totalAmount | currency }}</strong>
-            </td>
-          </tr>
-        </table>
-        <div class="panel-body">
-          <button
-            class="btn btn-success btn-block btn-lg"
-            ng-click="processOrder()"
-            ng-disabled="!customer.name || cart.length === 0 || processing"
-          >
-            {{ processing ? 'Processing...' : 'Complete Sale' }}
-          </button>
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-header fw-bold">Order Summary</div>
+          <table class="table table-hover">
+            <tr ng-repeat="item in cart">
+              <td class="ps-3">{{item.name}} x {{item.quantity}}</td>
+              <td class="text-end pe-3">
+                {{ (item.price * item.quantity) | currency }}
+              </td>
+            </tr>
+            <tr class="table-active fw-bold">
+              <td class="ps-3">Total Amount</td>
+              <td class="text-end pe-3 text-primary" style="font-size: 1.2rem">
+                {{ totalAmount | currency }}
+              </td>
+            </tr>
+          </table>
+          <div class="card-body">
+            <button
+              class="btn btn-success btn-lg w-100"
+              ng-click="processOrder()"
+              ng-disabled="checkoutForm.$invalid || cart.length === 0 || processing"
+            >
+              <i class="bi bi-check-circle me-2"></i>
+              {{ processing ? 'Processing...' : 'Complete Sale' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </form>
 </div>
