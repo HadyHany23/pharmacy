@@ -38,6 +38,25 @@ app.controller("HistoryController", function ($scope, $http, SB_CONFIG) {
     return true;
   };
 
+  // Custom filter for customer name and phone
+  $scope.customerFilter = function (order) {
+    if (!$scope.searchCustomer) return true;
+
+    const searchTerm = $scope.searchCustomer.toLowerCase();
+    const customerName =
+      order.customers && order.customers.name
+        ? order.customers.name.toLowerCase()
+        : "";
+    const customerPhone =
+      order.customers && order.customers.phone
+        ? order.customers.phone.toLowerCase()
+        : "";
+
+    return (
+      customerName.includes(searchTerm) || customerPhone.includes(searchTerm)
+    );
+  };
+
   $scope.resetFilters = function () {
     $scope.searchCustomer = "";
     $scope.startDate = null;

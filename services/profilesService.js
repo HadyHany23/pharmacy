@@ -6,12 +6,10 @@ app.service("ProfilesService", function ($http, SB_CONFIG) {
     return $http.get(TABLE_URL + "?select=*,roles(name)", getConfig);
   };
 
-  // Renamed parameter to 'profileData' to match the context
   this.createProfile = function (profileData) {
     return $http.post(TABLE_URL, profileData, getConfig);
   };
 
-  // Renamed parameter to 'profileData'
   this.updateProfile = function (id, profileData) {
     return $http.patch(TABLE_URL + "?id=eq." + id, profileData, getConfig);
   };
@@ -21,7 +19,6 @@ app.service("ProfilesService", function ($http, SB_CONFIG) {
   };
 
   this.searchProfile = function (query) {
-    // Also corrected the search field: profiles usually search by 'full_name' or 'username'
     return $http.get(TABLE_URL + "?full_name=ilike.*" + query + "*", getConfig);
   };
 });

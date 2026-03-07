@@ -32,8 +32,6 @@ app.controller("UsersController", function ($scope, UserService) {
     return "bi-arrow-down-up";
   };
 
-  // ================= USER LOGIC =================
-
   $scope.loadUsers = function () {
     $scope.loading = true;
     UserService.getUsers()
@@ -161,8 +159,6 @@ app.controller("UsersController", function ($scope, UserService) {
         });
     }
   };
-
-  // ================= UTILS =================
 
   $scope.resetForm = function () {
     $scope.isEdit = false;

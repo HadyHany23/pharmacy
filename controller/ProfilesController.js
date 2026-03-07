@@ -9,8 +9,6 @@ app.controller(
 
     $scope.searchQuery = "";
 
-    // ================= ROLE LOGIC =================
-
     $scope.loadRoles = function () {
       RolesService.getRoles()
         .then(function (response) {
@@ -108,8 +106,6 @@ app.controller(
         }
       });
     };
-
-    // ================= PROFILE LOGIC =================
 
     $scope.loadProfiles = function () {
       $scope.loading = true;
@@ -210,8 +206,6 @@ app.controller(
         }
       });
     };
-
-    // ================= UTILS =================
 
     $scope.resetForm = function () {
       $scope.isEdit = false;
