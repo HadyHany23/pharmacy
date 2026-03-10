@@ -1,10 +1,11 @@
 app.service("AuthService", function ($http, SB_CONFIG) {
   const PROFILE_URL = SB_CONFIG.URL + "profiles";
   const ROLES_URL = SB_CONFIG.URL + "roles";
-  const config = { headers: SB_CONFIG.HEADERS() };
+
+  const getHeaders = () => ({ headers: SB_CONFIG.HEADERS() });
 
   this.getRoles = function () {
-    return $http.get(ROLES_URL + "?select=*", config);
+    return $http.get(ROLES_URL + "?select=*", getHeaders());
   };
 
   this.login = function (un, pw) {
@@ -15,11 +16,11 @@ app.service("AuthService", function ($http, SB_CONFIG) {
         "&password=eq." +
         pw +
         "&select=*,roles(name)",
-      config,
+      getHeaders(),
     );
   };
 
   this.register = function (userObj) {
-    return $http.post(PROFILE_URL, userObj, config);
+    return $http.post(PROFILE_URL, userObj, getHeaders());
   };
 });

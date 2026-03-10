@@ -8,28 +8,25 @@
         </div>
 
         <form name="regForm" ng-submit="handleRegister()" novalidate>
-          <form name="regForm" novalidate>
-            <div class="mb-3">
-              <label class="form-label"
-                >Full Name <span class="text-danger">*</span></label
-              >
-              <input
-                type="text"
-                name="fullName"
-                class="form-control"
-                ng-model="regUser.full_name"
-                required
-                ng-minlength="4"
-                maxlength="20"
-                placeholder="John Doe"
-                ng-class="{'is-invalid': regForm.fullName.$dirty && regForm.fullName.$invalid, 'is-valid': regForm.fullName.$valid}"
-              />
-
-              <div class="invalid-feedback">
-                Full name must be at least 4 characters.
-              </div>
+          <div class="mb-3">
+            <label class="form-label"
+              >Full Name <span class="text-danger">*</span></label
+            >
+            <input
+              type="text"
+              name="fullName"
+              class="form-control"
+              ng-model="regUser.full_name"
+              required
+              ng-minlength="4"
+              maxlength="20"
+              placeholder="John Doe"
+              ng-class="{'is-invalid': regForm.fullName.$dirty && regForm.fullName.$invalid, 'is-valid': regForm.fullName.$valid}"
+            />
+            <div class="invalid-feedback">
+              Full name must be at least 4 characters.
             </div>
-          </form>
+          </div>
 
           <div class="mb-3">
             <label class="form-label"
@@ -80,7 +77,6 @@
               name="confirmPassword"
               class="form-control"
               ng-model="regUser.confirm_password"
-              maxlength="12"
               required
               placeholder="Re-enter password"
               ng-class="{'is-invalid': regUser.confirm_password && regUser.password !== regUser.confirm_password}"
@@ -116,13 +112,12 @@
             type="submit"
             ng-disabled="regForm.$invalid || regUser.password !== regUser.confirm_password || loading"
           >
-            <i class="bi bi-person-plus me-2"></i>
-            {{ loading ? 'Saving...' : 'Create Staff Account' }}
+            <i class="glyphicon glyphicon-user" style="margin-right: 8px"></i>
+            {{ loading ? 'Processing...' : 'Create Staff Account' }}
           </button>
 
           <div class="text-center">
-            Already have an account?
-            <a href="#!/login" class="text-decoration-none small"> Login</a>
+            Already have an account? <a href="#!/login">Login</a>
           </div>
         </form>
       </div>

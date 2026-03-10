@@ -2,6 +2,7 @@ app.controller("AuthController", function ($scope, $location, AuthService) {
   $scope.loginData = {};
   $scope.regUser = {};
   $scope.roles = [];
+  $scope.loading = false;
 
   const Toast = Swal.mixin({
     toast: true,
@@ -45,7 +46,15 @@ app.controller("AuthController", function ($scope, $location, AuthService) {
   };
 
   $scope.handleRegister = function () {
-    AuthService.register($scope.regUser)
+    if ($scope.regForm.$invalid) return;
+
+    $scope.loading = true;
+
+    let userData = angular.copy($scope.regUser);
+
+    delete userData.confirm_password;
+
+    AuthService.register(userData)
       .then(function () {
         Swal.fire({
           icon: "success",
@@ -62,17 +71,20 @@ app.controller("AuthController", function ($scope, $location, AuthService) {
           Swal.fire({
             icon: "warning",
             title: "Username Taken",
-            text: "This username is already registered. Please choose another.",
+            text: "This username is already registered.",
             confirmButtonColor: "#f8bb86",
           });
         } else {
           Swal.fire({
             icon: "error",
             title: "Registration Error",
-            text: "An unexpected error occurred. Please try again later.",
-            footer: "Error Code: " + err.status,
+            text: "Could not create account.",
+            footer: "Error: " + (err.data ? err.data.message : err.status),
           });
         }
+      })
+      .finally(function () {
+        $scope.loading = false;
       });
   };
 });
